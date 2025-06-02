@@ -1,0 +1,47 @@
+plugins {
+	id 'com.zeroc.gradle.ice-builder.slice' version '1.5.1' apply false
+}
+
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'com.zeroc.gradle.ice-builder.slice'
+
+	group   = 'com.example'
+	version = '0.1-SNAPSHOT'
+
+	java {
+		toolchain { languageVersion = JavaLanguageVersion.of(17) }
+	}
+
+	slice {
+		java {
+			files = [file('../App.ice')]   // genera proxies/stubs
+		}
+	}
+
+	repositories { mavenCentral() }
+
+	dependencies {
+		implementation 'com.zeroc:ice:3.7.10'
+	}
+
+	/* Copia las dependencias principales al directorio libs para
+     * que los .jar ejecutables queden autocontenidos.               */
+	tasks.register('copyIceDeps', Copy) {
+		from configurations.runtimeClasspath
+		include 'ice-*.jar'
+		into "$buildDir/libs"
+	}
+
+	jar {
+		manifest {
+			attributes(
+					'Main-Class' : project.ext.has('mainClass') ?
+							project.ext.mainClass : 'java.lang.Object',
+					'Class-Path' : configurations.runtimeClasspath.files
+							.collect { it.name }.join(' ')
+			)
+		}
+		dependsOn 'copyIceDeps'
+	}
+}
