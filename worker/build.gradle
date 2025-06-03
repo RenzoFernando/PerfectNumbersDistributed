@@ -1,1 +1,9 @@
+plugins {
+    id 'java'
+}
+
 ext.mainClass = 'com.example.worker.WorkerApp'
+
+dependencies {
+    implementation project(':PerfectNumbersApp')
+}
