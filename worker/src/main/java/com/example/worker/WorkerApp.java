@@ -1,7 +1,7 @@
 package com.example.worker;
 
 import com.zeroc.Ice.*;
-import com.example.perfectNumbers.*;
+import perfectNumbersApp.*;
 
 public class WorkerApp {
 

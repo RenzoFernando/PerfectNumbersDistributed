@@ -13,17 +13,17 @@
 // </auto-generated>
 //
 
-package com.example.perfectNumbers;
+package perfectNumbersApp;
 
-public interface ClientNotifier extends com.zeroc.Ice.Object
+public interface WorkerService extends com.zeroc.Ice.Object
 {
-    void notifyJobCompletion(Range originalRange, long[] perfectNumbers, String statusMessage, long elapsedTimeMillis, com.zeroc.Ice.Current current);
+    void processSubRange(Range subRangeToProcess, MasterControllerPrx masterCallbackProxy, String workerId, com.zeroc.Ice.Current current);
 
     /** @hidden */
     static final String[] _iceIds =
     {
         "::Ice::Object",
-        "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::ClientNotifier"
+        "::perfectNumbersApp::WorkerService"
     };
 
     @Override
@@ -40,7 +40,7 @@ public interface ClientNotifier extends com.zeroc.Ice.Object
 
     static String ice_staticId()
     {
-        return "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::ClientNotifier";
+        return "::perfectNumbersApp::WorkerService";
     }
 
     /**
@@ -50,20 +50,18 @@ public interface ClientNotifier extends com.zeroc.Ice.Object
      * @param current -
      * @return -
     **/
-    static java.util.concurrent.CompletionStage<com.zeroc.Ice.OutputStream> _iceD_notifyJobCompletion(ClientNotifier obj, final com.zeroc.IceInternal.Incoming inS, com.zeroc.Ice.Current current)
+    static java.util.concurrent.CompletionStage<com.zeroc.Ice.OutputStream> _iceD_processSubRange(WorkerService obj, final com.zeroc.IceInternal.Incoming inS, com.zeroc.Ice.Current current)
     {
         com.zeroc.Ice.Object._iceCheckMode(null, current.mode);
         com.zeroc.Ice.InputStream istr = inS.startReadParams();
-        Range iceP_originalRange;
-        long[] iceP_perfectNumbers;
-        String iceP_statusMessage;
-        long iceP_elapsedTimeMillis;
-        iceP_originalRange = Range.ice_read(istr);
-        iceP_perfectNumbers = istr.readLongSeq();
-        iceP_statusMessage = istr.readString();
-        iceP_elapsedTimeMillis = istr.readLong();
+        Range iceP_subRangeToProcess;
+        MasterControllerPrx iceP_masterCallbackProxy;
+        String iceP_workerId;
+        iceP_subRangeToProcess = Range.ice_read(istr);
+        iceP_masterCallbackProxy = MasterControllerPrx.uncheckedCast(istr.readProxy());
+        iceP_workerId = istr.readString();
         inS.endReadParams();
-        obj.notifyJobCompletion(iceP_originalRange, iceP_perfectNumbers, iceP_statusMessage, iceP_elapsedTimeMillis, current);
+        obj.processSubRange(iceP_subRangeToProcess, iceP_masterCallbackProxy, iceP_workerId, current);
         return inS.setResult(inS.writeEmptyParams());
     }
 
@@ -74,7 +72,7 @@ public interface ClientNotifier extends com.zeroc.Ice.Object
         "ice_ids",
         "ice_isA",
         "ice_ping",
-        "notifyJobCompletion"
+        "processSubRange"
     };
 
     /** @hidden */
@@ -108,7 +106,7 @@ public interface ClientNotifier extends com.zeroc.Ice.Object
             }
             case 4:
             {
-                return _iceD_notifyJobCompletion(this, in, current);
+                return _iceD_processSubRange(this, in, current);
             }
         }
 

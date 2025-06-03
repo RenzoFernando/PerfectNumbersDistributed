@@ -1,6 +1,6 @@
 package com.example.client;
 
-import PerfectNumbersApp.*;
+import perfectNumbersApp.*;
 import com.zeroc.Ice.Current;
 import java.util.Arrays;
 

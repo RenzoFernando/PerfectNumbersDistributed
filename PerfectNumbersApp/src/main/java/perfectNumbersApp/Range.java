@@ -13,7 +13,7 @@
 // </auto-generated>
 //
 
-package com.example.perfectNumbers;
+package perfectNumbersApp;
 
 public class Range implements java.lang.Cloneable,
                               java.io.Serializable
@@ -64,7 +64,7 @@ public class Range implements java.lang.Cloneable,
     public int hashCode()
     {
         int h_ = 5381;
-        h_ = com.zeroc.IceInternal.HashUtil.hashAdd(h_, "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::Range");
+        h_ = com.zeroc.IceInternal.HashUtil.hashAdd(h_, "::perfectNumbersApp::Range");
         h_ = com.zeroc.IceInternal.HashUtil.hashAdd(h_, start);
         h_ = com.zeroc.IceInternal.HashUtil.hashAdd(h_, end);
         return h_;
@@ -148,5 +148,5 @@ public class Range implements java.lang.Cloneable,
     private static final Range _nullMarshalValue = new Range();
 
     /** @hidden */
-    public static final long serialVersionUID = -1134951290L;
+    public static final long serialVersionUID = -1808896647L;
 }

@@ -13,7 +13,7 @@
 // </auto-generated>
 //
 
-package com.example.perfectNumbers;
+package perfectNumbersApp;
 
 public interface ClientNotifierPrx extends com.zeroc.Ice.ObjectPrx
 {
@@ -371,6 +371,6 @@ public interface ClientNotifierPrx extends com.zeroc.Ice.ObjectPrx
 
     static String ice_staticId()
     {
-        return "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::ClientNotifier";
+        return "::perfectNumbersApp::ClientNotifier";
     }
 }

@@ -13,17 +13,17 @@
 // </auto-generated>
 //
 
-package com.example.perfectNumbers;
+package perfectNumbersApp;
 
-public interface WorkerService extends com.zeroc.Ice.Object
+public interface MasterController extends com.zeroc.Ice.Object
 {
-    void processSubRange(Range subRangeToProcess, MasterControllerPrx masterCallbackProxy, String workerId, com.zeroc.Ice.Current current);
+    void submitWorkerResults(String workerId, Range processedSubRange, long[] perfectNumbersFound, com.zeroc.Ice.Current current);
 
     /** @hidden */
     static final String[] _iceIds =
     {
         "::Ice::Object",
-        "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::WorkerService"
+        "::perfectNumbersApp::MasterController"
     };
 
     @Override
@@ -40,7 +40,7 @@ public interface WorkerService extends com.zeroc.Ice.Object
 
     static String ice_staticId()
     {
-        return "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::WorkerService";
+        return "::perfectNumbersApp::MasterController";
     }
 
     /**
@@ -50,18 +50,18 @@ public interface WorkerService extends com.zeroc.Ice.Object
      * @param current -
      * @return -
     **/
-    static java.util.concurrent.CompletionStage<com.zeroc.Ice.OutputStream> _iceD_processSubRange(WorkerService obj, final com.zeroc.IceInternal.Incoming inS, com.zeroc.Ice.Current current)
+    static java.util.concurrent.CompletionStage<com.zeroc.Ice.OutputStream> _iceD_submitWorkerResults(MasterController obj, final com.zeroc.IceInternal.Incoming inS, com.zeroc.Ice.Current current)
     {
         com.zeroc.Ice.Object._iceCheckMode(null, current.mode);
         com.zeroc.Ice.InputStream istr = inS.startReadParams();
-        Range iceP_subRangeToProcess;
-        MasterControllerPrx iceP_masterCallbackProxy;
         String iceP_workerId;
-        iceP_subRangeToProcess = Range.ice_read(istr);
-        iceP_masterCallbackProxy = MasterControllerPrx.uncheckedCast(istr.readProxy());
+        Range iceP_processedSubRange;
+        long[] iceP_perfectNumbersFound;
         iceP_workerId = istr.readString();
+        iceP_processedSubRange = Range.ice_read(istr);
+        iceP_perfectNumbersFound = istr.readLongSeq();
         inS.endReadParams();
-        obj.processSubRange(iceP_subRangeToProcess, iceP_masterCallbackProxy, iceP_workerId, current);
+        obj.submitWorkerResults(iceP_workerId, iceP_processedSubRange, iceP_perfectNumbersFound, current);
         return inS.setResult(inS.writeEmptyParams());
     }
 
@@ -72,7 +72,7 @@ public interface WorkerService extends com.zeroc.Ice.Object
         "ice_ids",
         "ice_isA",
         "ice_ping",
-        "processSubRange"
+        "submitWorkerResults"
     };
 
     /** @hidden */
@@ -106,7 +106,7 @@ public interface WorkerService extends com.zeroc.Ice.Object
             }
             case 4:
             {
-                return _iceD_processSubRange(this, in, current);
+                return _iceD_submitWorkerResults(this, in, current);
             }
         }
 

@@ -13,10 +13,10 @@
 // </auto-generated>
 //
 
-package com.example.perfectNumbers;
+package perfectNumbersApp;
 
 /** @hidden */
-public class _MasterControllerPrxI extends com.zeroc.Ice._ObjectPrxI implements MasterControllerPrx
+public class _MasterServicePrxI extends com.zeroc.Ice._ObjectPrxI implements MasterServicePrx
 {
     /** @hidden */
     public static final long serialVersionUID = 0L;

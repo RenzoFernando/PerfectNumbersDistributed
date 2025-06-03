@@ -1,6 +1,6 @@
 package com.example.client;
 
-import PerfectNumbersApp.*;
+import perfectNumbersApp.*;
 import com.zeroc.Ice.*;
 
 public class ClientApp {

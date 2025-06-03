@@ -13,17 +13,17 @@
 // </auto-generated>
 //
 
-package com.example.perfectNumbers;
+package perfectNumbersApp;
 
-public interface MasterService extends com.zeroc.Ice.Object
+public interface ClientNotifier extends com.zeroc.Ice.Object
 {
-    void findPerfectNumbersInRange(Range jobRange, ClientNotifierPrx clientNotifierProxy, com.zeroc.Ice.Current current);
+    void notifyJobCompletion(Range originalRange, long[] perfectNumbers, String statusMessage, long elapsedTimeMillis, com.zeroc.Ice.Current current);
 
     /** @hidden */
     static final String[] _iceIds =
     {
         "::Ice::Object",
-        "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::MasterService"
+        "::perfectNumbersApp::ClientNotifier"
     };
 
     @Override
@@ -40,7 +40,7 @@ public interface MasterService extends com.zeroc.Ice.Object
 
     static String ice_staticId()
     {
-        return "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::MasterService";
+        return "::perfectNumbersApp::ClientNotifier";
     }
 
     /**
@@ -50,27 +50,31 @@ public interface MasterService extends com.zeroc.Ice.Object
      * @param current -
      * @return -
     **/
-    static java.util.concurrent.CompletionStage<com.zeroc.Ice.OutputStream> _iceD_findPerfectNumbersInRange(MasterService obj, final com.zeroc.IceInternal.Incoming inS, com.zeroc.Ice.Current current)
+    static java.util.concurrent.CompletionStage<com.zeroc.Ice.OutputStream> _iceD_notifyJobCompletion(ClientNotifier obj, final com.zeroc.IceInternal.Incoming inS, com.zeroc.Ice.Current current)
     {
         com.zeroc.Ice.Object._iceCheckMode(null, current.mode);
         com.zeroc.Ice.InputStream istr = inS.startReadParams();
-        Range iceP_jobRange;
-        ClientNotifierPrx iceP_clientNotifierProxy;
-        iceP_jobRange = Range.ice_read(istr);
-        iceP_clientNotifierProxy = ClientNotifierPrx.uncheckedCast(istr.readProxy());
+        Range iceP_originalRange;
+        long[] iceP_perfectNumbers;
+        String iceP_statusMessage;
+        long iceP_elapsedTimeMillis;
+        iceP_originalRange = Range.ice_read(istr);
+        iceP_perfectNumbers = istr.readLongSeq();
+        iceP_statusMessage = istr.readString();
+        iceP_elapsedTimeMillis = istr.readLong();
         inS.endReadParams();
-        obj.findPerfectNumbersInRange(iceP_jobRange, iceP_clientNotifierProxy, current);
+        obj.notifyJobCompletion(iceP_originalRange, iceP_perfectNumbers, iceP_statusMessage, iceP_elapsedTimeMillis, current);
         return inS.setResult(inS.writeEmptyParams());
     }
 
     /** @hidden */
     final static String[] _iceOps =
     {
-        "findPerfectNumbersInRange",
         "ice_id",
         "ice_ids",
         "ice_isA",
-        "ice_ping"
+        "ice_ping",
+        "notifyJobCompletion"
     };
 
     /** @hidden */
@@ -88,23 +92,23 @@ public interface MasterService extends com.zeroc.Ice.Object
         {
             case 0:
             {
-                return _iceD_findPerfectNumbersInRange(this, in, current);
+                return com.zeroc.Ice.Object._iceD_ice_id(this, in, current);
             }
             case 1:
             {
-                return com.zeroc.Ice.Object._iceD_ice_id(this, in, current);
+                return com.zeroc.Ice.Object._iceD_ice_ids(this, in, current);
             }
             case 2:
             {
-                return com.zeroc.Ice.Object._iceD_ice_ids(this, in, current);
+                return com.zeroc.Ice.Object._iceD_ice_isA(this, in, current);
             }
             case 3:
             {
-                return com.zeroc.Ice.Object._iceD_ice_isA(this, in, current);
+                return com.zeroc.Ice.Object._iceD_ice_ping(this, in, current);
             }
             case 4:
             {
-                return com.zeroc.Ice.Object._iceD_ice_ping(this, in, current);
+                return _iceD_notifyJobCompletion(this, in, current);
             }
         }
 

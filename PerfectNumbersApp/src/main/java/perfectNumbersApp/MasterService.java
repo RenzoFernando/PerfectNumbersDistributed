@@ -13,17 +13,17 @@
 // </auto-generated>
 //
 
-package com.example.perfectNumbers;
+package perfectNumbersApp;
 
-public interface MasterController extends com.zeroc.Ice.Object
+public interface MasterService extends com.zeroc.Ice.Object
 {
-    void submitWorkerResults(String workerId, Range processedSubRange, long[] perfectNumbersFound, com.zeroc.Ice.Current current);
+    void findPerfectNumbersInRange(Range jobRange, ClientNotifierPrx clientNotifierProxy, com.zeroc.Ice.Current current);
 
     /** @hidden */
     static final String[] _iceIds =
     {
         "::Ice::Object",
-        "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::MasterController"
+        "::perfectNumbersApp::MasterService"
     };
 
     @Override
@@ -40,7 +40,7 @@ public interface MasterController extends com.zeroc.Ice.Object
 
     static String ice_staticId()
     {
-        return "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::MasterController";
+        return "::perfectNumbersApp::MasterService";
     }
 
     /**
@@ -50,29 +50,27 @@ public interface MasterController extends com.zeroc.Ice.Object
      * @param current -
      * @return -
     **/
-    static java.util.concurrent.CompletionStage<com.zeroc.Ice.OutputStream> _iceD_submitWorkerResults(MasterController obj, final com.zeroc.IceInternal.Incoming inS, com.zeroc.Ice.Current current)
+    static java.util.concurrent.CompletionStage<com.zeroc.Ice.OutputStream> _iceD_findPerfectNumbersInRange(MasterService obj, final com.zeroc.IceInternal.Incoming inS, com.zeroc.Ice.Current current)
     {
         com.zeroc.Ice.Object._iceCheckMode(null, current.mode);
         com.zeroc.Ice.InputStream istr = inS.startReadParams();
-        String iceP_workerId;
-        Range iceP_processedSubRange;
-        long[] iceP_perfectNumbersFound;
-        iceP_workerId = istr.readString();
-        iceP_processedSubRange = Range.ice_read(istr);
-        iceP_perfectNumbersFound = istr.readLongSeq();
+        Range iceP_jobRange;
+        ClientNotifierPrx iceP_clientNotifierProxy;
+        iceP_jobRange = Range.ice_read(istr);
+        iceP_clientNotifierProxy = ClientNotifierPrx.uncheckedCast(istr.readProxy());
         inS.endReadParams();
-        obj.submitWorkerResults(iceP_workerId, iceP_processedSubRange, iceP_perfectNumbersFound, current);
+        obj.findPerfectNumbersInRange(iceP_jobRange, iceP_clientNotifierProxy, current);
         return inS.setResult(inS.writeEmptyParams());
     }
 
     /** @hidden */
     final static String[] _iceOps =
     {
+        "findPerfectNumbersInRange",
         "ice_id",
         "ice_ids",
         "ice_isA",
-        "ice_ping",
-        "submitWorkerResults"
+        "ice_ping"
     };
 
     /** @hidden */
@@ -90,23 +88,23 @@ public interface MasterController extends com.zeroc.Ice.Object
         {
             case 0:
             {
-                return com.zeroc.Ice.Object._iceD_ice_id(this, in, current);
+                return _iceD_findPerfectNumbersInRange(this, in, current);
             }
             case 1:
             {
-                return com.zeroc.Ice.Object._iceD_ice_ids(this, in, current);
+                return com.zeroc.Ice.Object._iceD_ice_id(this, in, current);
             }
             case 2:
             {
-                return com.zeroc.Ice.Object._iceD_ice_isA(this, in, current);
+                return com.zeroc.Ice.Object._iceD_ice_ids(this, in, current);
             }
             case 3:
             {
-                return com.zeroc.Ice.Object._iceD_ice_ping(this, in, current);
+                return com.zeroc.Ice.Object._iceD_ice_isA(this, in, current);
             }
             case 4:
             {
-                return _iceD_submitWorkerResults(this, in, current);
+                return com.zeroc.Ice.Object._iceD_ice_ping(this, in, current);
             }
         }
 

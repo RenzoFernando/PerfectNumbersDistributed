@@ -13,46 +13,46 @@
 // </auto-generated>
 //
 
-package com.example.perfectNumbers;
+package perfectNumbersApp;
 
-public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
+public interface WorkerServicePrx extends com.zeroc.Ice.ObjectPrx
 {
-    default void submitWorkerResults(String workerId, Range processedSubRange, long[] perfectNumbersFound)
+    default void processSubRange(Range subRangeToProcess, MasterControllerPrx masterCallbackProxy, String workerId)
     {
-        submitWorkerResults(workerId, processedSubRange, perfectNumbersFound, com.zeroc.Ice.ObjectPrx.noExplicitContext);
+        processSubRange(subRangeToProcess, masterCallbackProxy, workerId, com.zeroc.Ice.ObjectPrx.noExplicitContext);
     }
 
-    default void submitWorkerResults(String workerId, Range processedSubRange, long[] perfectNumbersFound, java.util.Map<String, String> context)
+    default void processSubRange(Range subRangeToProcess, MasterControllerPrx masterCallbackProxy, String workerId, java.util.Map<String, String> context)
     {
-        _iceI_submitWorkerResultsAsync(workerId, processedSubRange, perfectNumbersFound, context, true).waitForResponse();
+        _iceI_processSubRangeAsync(subRangeToProcess, masterCallbackProxy, workerId, context, true).waitForResponse();
     }
 
-    default java.util.concurrent.CompletableFuture<Void> submitWorkerResultsAsync(String workerId, Range processedSubRange, long[] perfectNumbersFound)
+    default java.util.concurrent.CompletableFuture<Void> processSubRangeAsync(Range subRangeToProcess, MasterControllerPrx masterCallbackProxy, String workerId)
     {
-        return _iceI_submitWorkerResultsAsync(workerId, processedSubRange, perfectNumbersFound, com.zeroc.Ice.ObjectPrx.noExplicitContext, false);
+        return _iceI_processSubRangeAsync(subRangeToProcess, masterCallbackProxy, workerId, com.zeroc.Ice.ObjectPrx.noExplicitContext, false);
     }
 
-    default java.util.concurrent.CompletableFuture<Void> submitWorkerResultsAsync(String workerId, Range processedSubRange, long[] perfectNumbersFound, java.util.Map<String, String> context)
+    default java.util.concurrent.CompletableFuture<Void> processSubRangeAsync(Range subRangeToProcess, MasterControllerPrx masterCallbackProxy, String workerId, java.util.Map<String, String> context)
     {
-        return _iceI_submitWorkerResultsAsync(workerId, processedSubRange, perfectNumbersFound, context, false);
+        return _iceI_processSubRangeAsync(subRangeToProcess, masterCallbackProxy, workerId, context, false);
     }
 
     /**
      * @hidden
+     * @param iceP_subRangeToProcess -
+     * @param iceP_masterCallbackProxy -
      * @param iceP_workerId -
-     * @param iceP_processedSubRange -
-     * @param iceP_perfectNumbersFound -
      * @param context -
      * @param sync -
      * @return -
      **/
-    default com.zeroc.IceInternal.OutgoingAsync<Void> _iceI_submitWorkerResultsAsync(String iceP_workerId, Range iceP_processedSubRange, long[] iceP_perfectNumbersFound, java.util.Map<String, String> context, boolean sync)
+    default com.zeroc.IceInternal.OutgoingAsync<Void> _iceI_processSubRangeAsync(Range iceP_subRangeToProcess, MasterControllerPrx iceP_masterCallbackProxy, String iceP_workerId, java.util.Map<String, String> context, boolean sync)
     {
-        com.zeroc.IceInternal.OutgoingAsync<Void> f = new com.zeroc.IceInternal.OutgoingAsync<>(this, "submitWorkerResults", null, sync, null);
+        com.zeroc.IceInternal.OutgoingAsync<Void> f = new com.zeroc.IceInternal.OutgoingAsync<>(this, "processSubRange", null, sync, null);
         f.invoke(false, context, null, ostr -> {
+                     Range.ice_write(ostr, iceP_subRangeToProcess);
+                     ostr.writeProxy(iceP_masterCallbackProxy);
                      ostr.writeString(iceP_workerId);
-                     Range.ice_write(ostr, iceP_processedSubRange);
-                     ostr.writeLongSeq(iceP_perfectNumbersFound);
                  }, null);
         return f;
     }
@@ -63,9 +63,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @param obj The untyped proxy.
      * @return A proxy for this type, or null if the object does not support this type.
      **/
-    static MasterControllerPrx checkedCast(com.zeroc.Ice.ObjectPrx obj)
+    static WorkerServicePrx checkedCast(com.zeroc.Ice.ObjectPrx obj)
     {
-        return com.zeroc.Ice.ObjectPrx._checkedCast(obj, ice_staticId(), MasterControllerPrx.class, _MasterControllerPrxI.class);
+        return com.zeroc.Ice.ObjectPrx._checkedCast(obj, ice_staticId(), WorkerServicePrx.class, _WorkerServicePrxI.class);
     }
 
     /**
@@ -75,9 +75,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @param context The Context map to send with the invocation.
      * @return A proxy for this type, or null if the object does not support this type.
      **/
-    static MasterControllerPrx checkedCast(com.zeroc.Ice.ObjectPrx obj, java.util.Map<String, String> context)
+    static WorkerServicePrx checkedCast(com.zeroc.Ice.ObjectPrx obj, java.util.Map<String, String> context)
     {
-        return com.zeroc.Ice.ObjectPrx._checkedCast(obj, context, ice_staticId(), MasterControllerPrx.class, _MasterControllerPrxI.class);
+        return com.zeroc.Ice.ObjectPrx._checkedCast(obj, context, ice_staticId(), WorkerServicePrx.class, _WorkerServicePrxI.class);
     }
 
     /**
@@ -87,9 +87,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @param facet The name of the desired facet.
      * @return A proxy for this type, or null if the object does not support this type.
      **/
-    static MasterControllerPrx checkedCast(com.zeroc.Ice.ObjectPrx obj, String facet)
+    static WorkerServicePrx checkedCast(com.zeroc.Ice.ObjectPrx obj, String facet)
     {
-        return com.zeroc.Ice.ObjectPrx._checkedCast(obj, facet, ice_staticId(), MasterControllerPrx.class, _MasterControllerPrxI.class);
+        return com.zeroc.Ice.ObjectPrx._checkedCast(obj, facet, ice_staticId(), WorkerServicePrx.class, _WorkerServicePrxI.class);
     }
 
     /**
@@ -100,9 +100,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @param context The Context map to send with the invocation.
      * @return A proxy for this type, or null if the object does not support this type.
      **/
-    static MasterControllerPrx checkedCast(com.zeroc.Ice.ObjectPrx obj, String facet, java.util.Map<String, String> context)
+    static WorkerServicePrx checkedCast(com.zeroc.Ice.ObjectPrx obj, String facet, java.util.Map<String, String> context)
     {
-        return com.zeroc.Ice.ObjectPrx._checkedCast(obj, facet, context, ice_staticId(), MasterControllerPrx.class, _MasterControllerPrxI.class);
+        return com.zeroc.Ice.ObjectPrx._checkedCast(obj, facet, context, ice_staticId(), WorkerServicePrx.class, _WorkerServicePrxI.class);
     }
 
     /**
@@ -110,9 +110,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @param obj The untyped proxy.
      * @return A proxy for this type.
      **/
-    static MasterControllerPrx uncheckedCast(com.zeroc.Ice.ObjectPrx obj)
+    static WorkerServicePrx uncheckedCast(com.zeroc.Ice.ObjectPrx obj)
     {
-        return com.zeroc.Ice.ObjectPrx._uncheckedCast(obj, MasterControllerPrx.class, _MasterControllerPrxI.class);
+        return com.zeroc.Ice.ObjectPrx._uncheckedCast(obj, WorkerServicePrx.class, _WorkerServicePrxI.class);
     }
 
     /**
@@ -121,9 +121,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @param facet The name of the desired facet.
      * @return A proxy for this type.
      **/
-    static MasterControllerPrx uncheckedCast(com.zeroc.Ice.ObjectPrx obj, String facet)
+    static WorkerServicePrx uncheckedCast(com.zeroc.Ice.ObjectPrx obj, String facet)
     {
-        return com.zeroc.Ice.ObjectPrx._uncheckedCast(obj, facet, MasterControllerPrx.class, _MasterControllerPrxI.class);
+        return com.zeroc.Ice.ObjectPrx._uncheckedCast(obj, facet, WorkerServicePrx.class, _WorkerServicePrxI.class);
     }
 
     /**
@@ -132,9 +132,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified per-proxy context.
      **/
     @Override
-    default MasterControllerPrx ice_context(java.util.Map<String, String> newContext)
+    default WorkerServicePrx ice_context(java.util.Map<String, String> newContext)
     {
-        return (MasterControllerPrx)_ice_context(newContext);
+        return (WorkerServicePrx)_ice_context(newContext);
     }
 
     /**
@@ -143,9 +143,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified adapter ID.
      **/
     @Override
-    default MasterControllerPrx ice_adapterId(String newAdapterId)
+    default WorkerServicePrx ice_adapterId(String newAdapterId)
     {
-        return (MasterControllerPrx)_ice_adapterId(newAdapterId);
+        return (WorkerServicePrx)_ice_adapterId(newAdapterId);
     }
 
     /**
@@ -154,9 +154,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified endpoints.
      **/
     @Override
-    default MasterControllerPrx ice_endpoints(com.zeroc.Ice.Endpoint[] newEndpoints)
+    default WorkerServicePrx ice_endpoints(com.zeroc.Ice.Endpoint[] newEndpoints)
     {
-        return (MasterControllerPrx)_ice_endpoints(newEndpoints);
+        return (WorkerServicePrx)_ice_endpoints(newEndpoints);
     }
 
     /**
@@ -165,9 +165,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified locator cache timeout.
      **/
     @Override
-    default MasterControllerPrx ice_locatorCacheTimeout(int newTimeout)
+    default WorkerServicePrx ice_locatorCacheTimeout(int newTimeout)
     {
-        return (MasterControllerPrx)_ice_locatorCacheTimeout(newTimeout);
+        return (WorkerServicePrx)_ice_locatorCacheTimeout(newTimeout);
     }
 
     /**
@@ -176,9 +176,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified invocation timeout.
      **/
     @Override
-    default MasterControllerPrx ice_invocationTimeout(int newTimeout)
+    default WorkerServicePrx ice_invocationTimeout(int newTimeout)
     {
-        return (MasterControllerPrx)_ice_invocationTimeout(newTimeout);
+        return (WorkerServicePrx)_ice_invocationTimeout(newTimeout);
     }
 
     /**
@@ -187,9 +187,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified caching policy.
      **/
     @Override
-    default MasterControllerPrx ice_connectionCached(boolean newCache)
+    default WorkerServicePrx ice_connectionCached(boolean newCache)
     {
-        return (MasterControllerPrx)_ice_connectionCached(newCache);
+        return (WorkerServicePrx)_ice_connectionCached(newCache);
     }
 
     /**
@@ -198,9 +198,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified endpoint selection policy.
      **/
     @Override
-    default MasterControllerPrx ice_endpointSelection(com.zeroc.Ice.EndpointSelectionType newType)
+    default WorkerServicePrx ice_endpointSelection(com.zeroc.Ice.EndpointSelectionType newType)
     {
-        return (MasterControllerPrx)_ice_endpointSelection(newType);
+        return (WorkerServicePrx)_ice_endpointSelection(newType);
     }
 
     /**
@@ -211,9 +211,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified selection policy.
      **/
     @Override
-    default MasterControllerPrx ice_secure(boolean b)
+    default WorkerServicePrx ice_secure(boolean b)
     {
-        return (MasterControllerPrx)_ice_secure(b);
+        return (WorkerServicePrx)_ice_secure(b);
     }
 
     /**
@@ -222,9 +222,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified encoding version.
      **/
     @Override
-    default MasterControllerPrx ice_encodingVersion(com.zeroc.Ice.EncodingVersion e)
+    default WorkerServicePrx ice_encodingVersion(com.zeroc.Ice.EncodingVersion e)
     {
-        return (MasterControllerPrx)_ice_encodingVersion(e);
+        return (WorkerServicePrx)_ice_encodingVersion(e);
     }
 
     /**
@@ -235,9 +235,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified selection policy.
      **/
     @Override
-    default MasterControllerPrx ice_preferSecure(boolean b)
+    default WorkerServicePrx ice_preferSecure(boolean b)
     {
-        return (MasterControllerPrx)_ice_preferSecure(b);
+        return (WorkerServicePrx)_ice_preferSecure(b);
     }
 
     /**
@@ -246,9 +246,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified router.
      **/
     @Override
-    default MasterControllerPrx ice_router(com.zeroc.Ice.RouterPrx router)
+    default WorkerServicePrx ice_router(com.zeroc.Ice.RouterPrx router)
     {
-        return (MasterControllerPrx)_ice_router(router);
+        return (WorkerServicePrx)_ice_router(router);
     }
 
     /**
@@ -257,9 +257,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified locator.
      **/
     @Override
-    default MasterControllerPrx ice_locator(com.zeroc.Ice.LocatorPrx locator)
+    default WorkerServicePrx ice_locator(com.zeroc.Ice.LocatorPrx locator)
     {
-        return (MasterControllerPrx)_ice_locator(locator);
+        return (WorkerServicePrx)_ice_locator(locator);
     }
 
     /**
@@ -268,9 +268,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified collocation optimization.
      **/
     @Override
-    default MasterControllerPrx ice_collocationOptimized(boolean b)
+    default WorkerServicePrx ice_collocationOptimized(boolean b)
     {
-        return (MasterControllerPrx)_ice_collocationOptimized(b);
+        return (WorkerServicePrx)_ice_collocationOptimized(b);
     }
 
     /**
@@ -278,9 +278,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy that uses twoway invocations.
      **/
     @Override
-    default MasterControllerPrx ice_twoway()
+    default WorkerServicePrx ice_twoway()
     {
-        return (MasterControllerPrx)_ice_twoway();
+        return (WorkerServicePrx)_ice_twoway();
     }
 
     /**
@@ -288,9 +288,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy that uses oneway invocations.
      **/
     @Override
-    default MasterControllerPrx ice_oneway()
+    default WorkerServicePrx ice_oneway()
     {
-        return (MasterControllerPrx)_ice_oneway();
+        return (WorkerServicePrx)_ice_oneway();
     }
 
     /**
@@ -298,9 +298,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy that uses batch oneway invocations.
      **/
     @Override
-    default MasterControllerPrx ice_batchOneway()
+    default WorkerServicePrx ice_batchOneway()
     {
-        return (MasterControllerPrx)_ice_batchOneway();
+        return (WorkerServicePrx)_ice_batchOneway();
     }
 
     /**
@@ -308,9 +308,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy that uses datagram invocations.
      **/
     @Override
-    default MasterControllerPrx ice_datagram()
+    default WorkerServicePrx ice_datagram()
     {
-        return (MasterControllerPrx)_ice_datagram();
+        return (WorkerServicePrx)_ice_datagram();
     }
 
     /**
@@ -318,9 +318,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy that uses batch datagram invocations.
      **/
     @Override
-    default MasterControllerPrx ice_batchDatagram()
+    default WorkerServicePrx ice_batchDatagram()
     {
-        return (MasterControllerPrx)_ice_batchDatagram();
+        return (WorkerServicePrx)_ice_batchDatagram();
     }
 
     /**
@@ -329,9 +329,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified compression setting.
      **/
     @Override
-    default MasterControllerPrx ice_compress(boolean co)
+    default WorkerServicePrx ice_compress(boolean co)
     {
-        return (MasterControllerPrx)_ice_compress(co);
+        return (WorkerServicePrx)_ice_compress(co);
     }
 
     /**
@@ -340,9 +340,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified timeout.
      **/
     @Override
-    default MasterControllerPrx ice_timeout(int t)
+    default WorkerServicePrx ice_timeout(int t)
     {
-        return (MasterControllerPrx)_ice_timeout(t);
+        return (WorkerServicePrx)_ice_timeout(t);
     }
 
     /**
@@ -351,9 +351,9 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A proxy with the specified connection ID.
      **/
     @Override
-    default MasterControllerPrx ice_connectionId(String connectionId)
+    default WorkerServicePrx ice_connectionId(String connectionId)
     {
-        return (MasterControllerPrx)_ice_connectionId(connectionId);
+        return (WorkerServicePrx)_ice_connectionId(connectionId);
     }
 
     /**
@@ -362,13 +362,13 @@ public interface MasterControllerPrx extends com.zeroc.Ice.ObjectPrx
      * @return A fixed proxy bound to the given connection.
      **/
     @Override
-    default MasterControllerPrx ice_fixed(com.zeroc.Ice.Connection connection)
+    default WorkerServicePrx ice_fixed(com.zeroc.Ice.Connection connection)
     {
-        return (MasterControllerPrx)_ice_fixed(connection);
+        return (WorkerServicePrx)_ice_fixed(connection);
     }
 
     static String ice_staticId()
     {
-        return "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::MasterController";
+        return "::perfectNumbersApp::WorkerService";
     }
 }

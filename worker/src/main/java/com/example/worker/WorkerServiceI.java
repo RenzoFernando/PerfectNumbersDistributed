@@ -1,6 +1,6 @@
 package com.example.worker;
 
-import com.example.perfectNumbers.*;
+import perfectNumbersApp.*;
 import com.zeroc.Ice.*;
 
 import java.util.List;
@@ -27,6 +27,7 @@ public class WorkerServiceI implements WorkerService {
 
         // NumberList result = new NumberList(resultArray); <- No lo reconoce.......
 
+        // TODO: Verificar que esta comunicación sea asincronica (Parece ser que no)
         masterCallbackProxy.submitWorkerResults(workerId, subRangeToProcess, result);
 
         System.out.println("[WORKER " + workerId + "] Finalizó subrango. Resultados enviados.");

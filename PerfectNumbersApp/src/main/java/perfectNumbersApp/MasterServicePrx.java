@@ -13,7 +13,7 @@
 // </auto-generated>
 //
 
-package com.example.perfectNumbers;
+package perfectNumbersApp;
 
 public interface MasterServicePrx extends com.zeroc.Ice.ObjectPrx
 {
@@ -367,6 +367,6 @@ public interface MasterServicePrx extends com.zeroc.Ice.ObjectPrx
 
     static String ice_staticId()
     {
-        return "::PerfectNumbersApp::src::main::java::com::example::perfectNumbers::MasterService";
+        return "::perfectNumbersApp::MasterService";
     }
 }

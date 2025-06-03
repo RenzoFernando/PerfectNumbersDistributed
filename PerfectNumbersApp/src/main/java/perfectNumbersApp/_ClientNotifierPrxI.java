@@ -13,7 +13,7 @@
 // </auto-generated>
 //
 
-package com.example.perfectNumbers;
+package perfectNumbersApp;
 
 /** @hidden */
 public class _ClientNotifierPrxI extends com.zeroc.Ice._ObjectPrxI implements ClientNotifierPrx

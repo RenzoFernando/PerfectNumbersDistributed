@@ -1,6 +1,6 @@
 package com.example.master;
 
-import PerfectNumbersApp.*;
+import perfectNumbersApp.*;
 import com.zeroc.Ice.Current;
 
 import java.util.Map;
