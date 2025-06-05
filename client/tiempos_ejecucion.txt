@@ -1,0 +1,40 @@
+--- INICIO EJECUCION: 2025-06-05 16:20:30.184 ---
+Rango Solicitado: [1] - [100000]
+Workers Solicitados (Cliente): 1
+Workers Activos Reportados (Previo a la búsqueda): 1
+Números Perfectos Encontrados: [6, 28, 496, 8128]
+Estado Final (Maestro): Trabajo completado. 1 worker(s) participaron.
+Tiempo de Procesamiento (Maestro): 255 ms
+Tiempo Total de Ejecución (Cliente): 329 ms
+--- FIN EJECUCION ---
+
+--- INICIO EJECUCION: 2025-06-05 16:21:15.332 ---
+Rango Solicitado: [1] - [800000]
+Workers Solicitados (Cliente): 2
+Workers Activos Reportados (Previo a la búsqueda): 2
+Números Perfectos Encontrados: [6, 28, 496, 8128]
+Estado Final (Maestro): Trabajo completado. 2 worker(s) participaron.
+Tiempo de Procesamiento (Maestro): 874 ms
+Tiempo Total de Ejecución (Cliente): 887 ms
+--- FIN EJECUCION ---
+
+--- INICIO EJECUCION: 2025-06-05 16:22:10.768 ---
+Rango Solicitado: [1] - [10000000]
+Workers Solicitados (Cliente): 2
+Workers Activos Reportados (Previo a la búsqueda): 2
+Números Perfectos Encontrados: [6, 28, 496, 8128]
+Estado Final (Maestro): Trabajo completado. 2 worker(s) participaron.
+Tiempo de Procesamiento (Maestro): 35389 ms
+Tiempo Total de Ejecución (Cliente): 35394 ms
+--- FIN EJECUCION ---
+
+--- INICIO EJECUCION: 2025-06-05 16:23:19.151 ---
+Rango Solicitado: [1] - [10000000]
+Workers Solicitados (Cliente): 2
+Workers Activos Reportados (Previo a la búsqueda): 2
+Números Perfectos Encontrados: [6, 28, 496, 8128]
+Estado Final (Maestro): Trabajo completado. 2 worker(s) participaron.
+Tiempo de Procesamiento (Maestro): 35429 ms
+Tiempo Total de Ejecución (Cliente): 35434 ms
+--- FIN EJECUCION ---
+

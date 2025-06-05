@@ -1,13 +1,17 @@
+// --- Archivo: master/src/main/java/com/example/master/MasterControllerI.java ---
 package com.example.master;
 
-import perfectNumbersApp.Range; // Clase generada por ICE que representa un rango con 'start' y 'end'
-import perfectNumbersApp.MasterController; // Interfaz generada por ICE
-
+import perfectNumbersApp.Range;
+import perfectNumbersApp.MasterController;
 import com.zeroc.Ice.Current;
-
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -16,138 +20,129 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Implementación del servant MasterController.
+ * Este objeto es invocado por los Workers para reportar los resultados de los subrangos
+ * que han procesado.
+ */
 public class MasterControllerI implements MasterController {
+    private final Map<String, WorkerResult> partialResults = new ConcurrentHashMap<>();
+    private CountDownLatch jobCompletionLatch;
+    private String currentJobLogId; // Para agrupar logs de un trabajo en el archivo
 
-    // Mapa que guarda los resultados parciales de cada worker (clave: workerId, valor: arreglo de números perfectos)
-    private final Map<String, long[]> partialResults = new ConcurrentHashMap<>();
-
-    // Latch que se usa para esperar a que todos los workers terminen o fallen
-    private CountDownLatch jobCompletionLatch; // Mantener privado
-
-    /**
-     * Prepara el controlador para un nuevo trabajo.
-     * @param numberOfWorkers Cantidad de workers a los que se asignó trabajo.
-     */
-    public void resetForNewJob(int numberOfWorkers) {
-        partialResults.clear(); // Limpiar resultados previos
-        if (numberOfWorkers > 0) {
-            // Inicializar el latch con el número de workers que van a responder
-            jobCompletionLatch = new CountDownLatch(numberOfWorkers);
-        } else {
-            // Si no hay workers, el latch ya está a 0 para no esperar
-            jobCompletionLatch = new CountDownLatch(0); // Latch ya contado si no hay workers
+    private static class WorkerResult {
+        final long[] numbers;
+        final long processingTime;
+        WorkerResult(long[] numbers, long processingTime) {
+            this.numbers = numbers;
+            this.processingTime = processingTime;
         }
-        System.out.println("[MASTER_CONTROLLER] Reiniciado para nuevo trabajo. Esperando " + (numberOfWorkers > 0 ? numberOfWorkers : 0) + " respuestas.");
     }
 
-    /**
-     * Si un worker falla o no recibe tarea, descontar del latch para no quedar esperando indefinidamente.
-     */
-    public void handleWorkerFailure() {
+    public void resetForNewJob(int numberOfParticipatingWorkers, String jobLogId) {
+        partialResults.clear();
+        this.currentJobLogId = jobLogId;
+        if (numberOfParticipatingWorkers > 0) {
+            jobCompletionLatch = new CountDownLatch(numberOfParticipatingWorkers);
+        } else {
+            jobCompletionLatch = new CountDownLatch(0);
+        }
+        System.out.println("[MASTER_CONTROLLER] ("+jobLogId+") Estado reiniciado. Esperando " + numberOfParticipatingWorkers + " respuesta(s).");
+    }
+
+    public void handleWorkerFailureOrNoTask(String workerId) {
         if (jobCompletionLatch != null && jobCompletionLatch.getCount() > 0) {
             jobCompletionLatch.countDown();
-            System.out.println("[MASTER_CONTROLLER] Falla de worker manejada/worker no usado. Latch ahora en: " + jobCompletionLatch.getCount());
+            System.out.println("[MASTER_CONTROLLER] ("+currentJobLogId+") Falla/No-Tarea para worker " + workerId + ". Latch ahora en: " + jobCompletionLatch.getCount());
+            // Registrar esta "falla" o no asignación en el log de tiempos
+            try (PrintWriter writer = new PrintWriter(new FileWriter("tiempos_ejecucion.txt", true))) {
+                writer.println("Job ID: " + currentJobLogId + " - Worker ID: " + workerId + " - Tiempo Procesamiento: N/A (Falla o no asignado)");
+            } catch (IOException e) {
+                System.err.println("[MASTER_CONTROLLER] Error escribiendo log de falla de worker: " + e.getMessage());
+            }
         }
     }
 
-    /**
-     * Permite consultar cuántas respuestas faltan según el latch.
-     * @return Cantidad de contadores todavía activos en el latch.
-     */
     public long getJobCompletionLatchCount() {
         return (jobCompletionLatch != null) ? jobCompletionLatch.getCount() : 0;
     }
 
-    /**
-     * Método que los workers invocan para enviar sus resultados al Maestro.
-     * @param workerId Identificador único del worker.
-     * @param processedSubRange Subrango que procesó este worker.
-     * @param perfectNumbersFound Arreglo de números perfectos encontrados en ese subrango.
-     * @param current Contexto ICE (no se usa directamente aquí).
-     * @return CompletionStage para la llamada asíncrona (completado instantáneo).
-     */
     @Override
     public CompletionStage<Void> submitWorkerResultsAsync(
             String workerId,
-            perfectNumbersApp.Range processedSubRange, // Usar el tipo correcto
-            long[] perfectNumbersFound, // NameList (sequence<long>) se mapea a long[]
+            Range processedSubRange,
+            long[] perfectNumbersFound,
+            long workerProcessingTimeMillis, // Nuevo parámetro
             Current current) {
 
-        // Imprimir en consola qué subrango procesó y qué resultados obtuvo
-        System.out.println("[MASTER_CONTROLLER] Resultados recibidos del worker: " + workerId +
-                " para el subrango [" + processedSubRange.start + ", " + processedSubRange.end + "]. " +
-                "Números perfectos encontrados: " + Arrays.toString(perfectNumbersFound));
+        System.out.println("[MASTER_CONTROLLER] ("+currentJobLogId+") Resultados de worker: " + workerId +
+                " para subrango [" + processedSubRange.start + ", " + processedSubRange.end + "]. " +
+                "Encontrados: " + Arrays.toString(perfectNumbersFound) +
+                ". Tiempo del worker: " + workerProcessingTimeMillis + " ms.");
 
-        // Guardar estos resultados en el mapa, usando como llave el workerId
-        partialResults.put(workerId, perfectNumbersFound);
+        partialResults.put(workerId, new WorkerResult(perfectNumbersFound, workerProcessingTimeMillis));
 
-        // Descontar uno del latch si aún hay contadores activos
-        if (jobCompletionLatch != null && jobCompletionLatch.getCount() > 0) {
-            jobCompletionLatch.countDown();
-            System.out.println("[MASTER_CONTROLLER] Respuesta contada del worker " + workerId + ". Latch ahora en: " + jobCompletionLatch.getCount());
-        } else {
-            // En caso de recibir más respuestas de las esperadas o latch nulo
-            System.err.println("[MASTER_CONTROLLER] Latch nulo o ya en cero al recibir resultados de " + workerId + ". Latch: " + getJobCompletionLatchCount());
+        // Registrar tiempo del worker en el archivo
+        try (PrintWriter writer = new PrintWriter(new FileWriter("tiempos_ejecucion.txt", true))) {
+            // Asumiendo que currentJobLogId se establece al inicio de un nuevo trabajo en MasterServiceI
+            writer.println("Job ID: " + currentJobLogId +
+                    " - Worker ID: " + workerId +
+                    " - Subrango: [" + processedSubRange.start + "-" + processedSubRange.end + "]" +
+                    " - Tiempo Procesamiento Worker: " + workerProcessingTimeMillis + " ms" +
+                    " - Perfectos Encontrados (Worker): " + Arrays.toString(perfectNumbersFound));
+        } catch (IOException e) {
+            System.err.println("[MASTER_CONTROLLER] Error escribiendo tiempo de worker a archivo: " + e.getMessage());
         }
 
-        // Devolver un CompletionStage ya completado porque no necesitamos hacer más trabajo luego
+
+        if (jobCompletionLatch != null && jobCompletionLatch.getCount() > 0) {
+            jobCompletionLatch.countDown();
+            System.out.println("[MASTER_CONTROLLER] ("+currentJobLogId+") Respuesta contada de " + workerId + ". Latch: " + jobCompletionLatch.getCount());
+        } else {
+            System.err.println("[MASTER_CONTROLLER] ("+currentJobLogId+") ADVERTENCIA: Latch nulo o en cero al recibir de " + workerId +
+                    ". Latch: " + (jobCompletionLatch != null ? jobCompletionLatch.getCount() : "nulo"));
+        }
         return CompletableFuture.completedFuture(null);
     }
 
-    /**
-     * Esperar hasta que todos los workers hayan respondido o hasta que pase el timeout.
-     * @param timeoutMillis Milisegundos máximos para esperar.
-     * @return true si todos los workers respondieron antes del timeout, false si hubo timeout o se interrumpió.
-     */
     public boolean awaitJobCompletion(long timeoutMillis) {
         if (jobCompletionLatch == null) {
-            System.err.println("[MASTER_CONTROLLER] awaitJobCompletion llamado pero el latch es nulo.");
-            return true; // Consideramos que ya está "completado"
+            System.err.println("[MASTER_CONTROLLER] ("+currentJobLogId+") awaitJobCompletion: Latch nulo. Asumiendo no había trabajo.");
+            return true;
         }
         if (jobCompletionLatch.getCount() == 0) {
-            // Si ya estaba en cero, no esperar
-            System.out.println("[MASTER_CONTROLLER] El trabajo ya está completado (latch en cero) al inicio de awaitJobCompletion.");
+            System.out.println("[MASTER_CONTROLLER] ("+currentJobLogId+") Trabajo ya completado (latch en cero) al inicio de await.");
             return true;
         }
         try {
-            System.out.println("[MASTER_CONTROLLER] Esperando la finalización de " + jobCompletionLatch.getCount() + " workers...");
-            // Esperar hasta que el latch llegue a 0 o se alcance el timeout
+            System.out.println("[MASTER_CONTROLLER] ("+currentJobLogId+") Esperando finalización de " + jobCompletionLatch.getCount() +
+                    " worker(s) restantes (timeout: " + timeoutMillis + "ms)...");
             boolean completed = jobCompletionLatch.await(timeoutMillis, TimeUnit.MILLISECONDS);
             if (!completed) {
-                System.err.println("[MASTER_CONTROLLER] Timeout esperando a los workers. Faltaron " + jobCompletionLatch.getCount() + " respuestas.");
+                System.err.println("[MASTER_CONTROLLER] ("+currentJobLogId+") TIMEOUT esperando workers. Faltaron " +
+                        jobCompletionLatch.getCount() + " después de " + timeoutMillis + "ms.");
             } else {
-                System.out.println("[MASTER_CONTROLLER] Todos los workers han respondido o timeout/fallas manejadas.");
+                System.out.println("[MASTER_CONTROLLER] ("+currentJobLogId+") Todos los workers asignados respondieron o fallas manejadas.");
             }
             return completed;
         } catch (InterruptedException e) {
-            System.err.println("[MASTER_CONTROLLER] Hilo interrumpido mientras esperaba la finalización del trabajo.");
-            Thread.currentThread().interrupt(); // Restaurar la interrupción
+            System.err.println("[MASTER_CONTROLLER] ("+currentJobLogId+") Hilo interrumpido esperando workers.");
+            Thread.currentThread().interrupt();
             return false;
         }
     }
 
-    /**
-     * Combina todos los números perfectos encontrados por cada worker en un solo arreglo ordenado.
-     * @return Arreglo de todos los números perfectos, ordenados de menor a mayor.
-     */
     public long[] getAllFoundPerfectNumbers() {
-        // Crear una lista para juntar todos los valores de cada arreglo
         List<Long> allPerfectsList = new ArrayList<>();
-        for (long[] results : partialResults.values()) {
-            for (long p : results) {
+        for (WorkerResult result : partialResults.values()) {
+            for (long p : result.numbers) {
                 allPerfectsList.add(p);
             }
         }
-
-        // Ordenar la lista de números perfectos
         Collections.sort(allPerfectsList);
-
-        // Convertir la lista ordenada a un arreglo de tipo primitivo long[]
-        long[] finalResult = new long[allPerfectsList.size()];
-        for (int i = 0; i < allPerfectsList.size(); i++) {
-            finalResult[i] = allPerfectsList.get(i);
-        }
-        System.out.println("[MASTER_CONTROLLER] Resultados consolidados: " + Arrays.toString(finalResult));
+        long[] finalResult = allPerfectsList.stream().mapToLong(l -> l).toArray();
+        System.out.println("[MASTER_CONTROLLER] ("+currentJobLogId+") Resultados parciales consolidados. Total: " + finalResult.length +
+                ". Números: " + Arrays.toString(finalResult));
         return finalResult;
     }
 }

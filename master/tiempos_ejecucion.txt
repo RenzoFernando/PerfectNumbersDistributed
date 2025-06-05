@@ -1,0 +1,11 @@
+Job ID: Job-27908 - Worker ID: Job-27908-W1-8094c337 - Subrango: [1-100000] - Tiempo Procesamiento Worker: 92 ms - Perfectos Encontrados (Worker): [6, 28, 496, 8128]
+Job ID: Job-27908 - Tiempo Total Procesamiento Maestro: 255 ms
+Job ID: Job-988d7 - Worker ID: Job-988d7-W1-8094c337 - Subrango: [1-400000] - Tiempo Procesamiento Worker: 474 ms - Perfectos Encontrados (Worker): [6, 28, 496, 8128]
+Job ID: Job-988d7 - Worker ID: Job-988d7-W2-91624137 - Subrango: [400001-800000] - Tiempo Procesamiento Worker: 828 ms - Perfectos Encontrados (Worker): []
+Job ID: Job-988d7 - Tiempo Total Procesamiento Maestro: 874 ms
+Job ID: Job-097a2 - Worker ID: Job-097a2-W1-8094c337 - Subrango: [1-5000000] - Tiempo Procesamiento Worker: 19990 ms - Perfectos Encontrados (Worker): [6, 28, 496, 8128]
+Job ID: Job-097a2 - Worker ID: Job-097a2-W2-91624137 - Subrango: [5000001-10000000] - Tiempo Procesamiento Worker: 35385 ms - Perfectos Encontrados (Worker): []
+Job ID: Job-097a2 - Tiempo Total Procesamiento Maestro: 35389 ms
+Job ID: Job-3f2c5 - Worker ID: Job-3f2c5-W1-8094c337 - Subrango: [1-5000000] - Tiempo Procesamiento Worker: 19843 ms - Perfectos Encontrados (Worker): [6, 28, 496, 8128]
+Job ID: Job-3f2c5 - Worker ID: Job-3f2c5-W2-91624137 - Subrango: [5000001-10000000] - Tiempo Procesamiento Worker: 35424 ms - Perfectos Encontrados (Worker): []
+Job ID: Job-3f2c5 - Tiempo Total Procesamiento Maestro: 35429 ms

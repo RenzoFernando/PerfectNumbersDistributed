@@ -1,68 +1,57 @@
+// --- Archivo: worker/src/main/java/com/example/worker/WorkerServiceI.java ---
 package com.example.worker;
 
-import perfectNumbersApp.Range; // Clase generada por ICE que representa un rango
-import perfectNumbersApp.MasterControllerPrx; // Proxy para el controlador del Maestro
-import perfectNumbersApp.WorkerService; // Interfaz generada por ICE para el servicio del worker
-
+import perfectNumbersApp.Range;
+import perfectNumbersApp.MasterControllerPrx;
+import perfectNumbersApp.WorkerService;
 import com.zeroc.Ice.Current;
-
-import java.util.ArrayList;
+import com.zeroc.Ice.LocalException; // Para capturar errores de comunicación con el maestro
 import java.util.List;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+/**
+ * Implementación del servant WorkerService.
+ */
 public class WorkerServiceI implements WorkerService {
 
-    /**
-     * Método remoto que el Maestro invoca para procesar un subrango.
-     * @param subRangeToProcess Rango que este worker debe procesar.
-     * @param masterCallbackProxy Proxy para enviar los resultados de vuelta al MasterController.
-     * @param workerId Identificador único de este trabajo (asignado por el Maestro).
-     * @param current Contexto ICE (no se usa directamente aquí).
-     * @return CompletionStage<Void> para indicar que la llamada es asíncrona.
-     */
     @Override
     public CompletionStage<Void> processSubRangeAsync(
-            perfectNumbersApp.Range subRangeToProcess, // Usar el tipo correcto
+            Range subRangeToProcess,
             MasterControllerPrx masterCallbackProxy,
-            String workerId,
+            String workerJobId, // ID específico para esta tarea, asignado por el Maestro
             Current current) {
 
-        // Imprimir en consola qué subrango se va a procesar
-        System.out.println("[WORKER " + workerId + "] Recibido subrango para procesar: [" +
-                subRangeToProcess.start + ", " + subRangeToProcess.end + "]");
+        System.out.println("[" + workerJobId + "] Recibido subrango: [" + subRangeToProcess.start + ", " + subRangeToProcess.end + "]");
 
-        // Ejecutar la tarea en un hilo separado para no bloquear Ice
         return CompletableFuture.runAsync(() -> {
-            // Obtener la lista de números perfectos en este subrango
+            long calculationStartTime = System.currentTimeMillis();
             List<Long> foundPerfectNumbersList = WorkerUtils.getPerfectNumbersInRange(
                     subRangeToProcess.start, subRangeToProcess.end);
+            long calculationEndTime = System.currentTimeMillis();
+            long workerProcessingTimeMillis = calculationEndTime - calculationStartTime;
 
-            // Convertir la lista de Long a un arreglo primitivo long[]
-            long[] perfectNumbersArray = new long[foundPerfectNumbersList.size()];
-            for (int i = 0; i < foundPerfectNumbersList.size(); i++) {
-                perfectNumbersArray[i] = foundPerfectNumbersList.get(i);
-            }
+            long[] perfectNumbersArray = foundPerfectNumbersList.stream().mapToLong(l -> l).toArray();
 
-            // Mostrar en consola los números perfectos encontrados
-            System.out.println("[WORKER " + workerId + "] Números perfectos encontrados en el subrango: " +
-                    Arrays.toString(perfectNumbersArray));
+            System.out.println("[" + workerJobId + "] Números encontrados: " + Arrays.toString(perfectNumbersArray) +
+                    ". Tiempo de cálculo ESTE SUBRANGO: " + workerProcessingTimeMillis + " ms.");
 
-            // Enviar resultados de vuelta al MasterController si el proxy es válido
             if (masterCallbackProxy != null) {
                 try {
-                    System.out.println("[WORKER " + workerId + "] Enviando resultados al MasterController...");
-                    masterCallbackProxy.submitWorkerResultsAsync(workerId, subRangeToProcess, perfectNumbersArray);
-                    System.out.println("[WORKER " + workerId + "] Resultados enviados.");
+                    System.out.println("[" + workerJobId + "] Enviando " + perfectNumbersArray.length + " resultado(s) al MasterController...");
+                    masterCallbackProxy.submitWorkerResultsAsync(workerJobId, subRangeToProcess, perfectNumbersArray, workerProcessingTimeMillis);
+                    System.out.println("[" + workerJobId + "] Resultados enviados al MasterController.");
+                } catch (LocalException e) {
+                    System.err.println("[" + workerJobId + "] ERROR al enviar resultados al MasterController: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                    // e.printStackTrace(); // Descomentar para ver traza completa
+                    // En un sistema real, aquí podría haber lógica de reintento o notificación de fallo.
                 } catch (Exception e) {
-                    // Si falla el envío, mostrar error en consola
-                    System.err.println("[WORKER " + workerId + "] Error al enviar resultados al MasterController: " + e.getMessage());
+                    System.err.println("[" + workerJobId + "] ERROR INESPERADO al enviar resultados al MasterController: " + e.getMessage());
                     e.printStackTrace();
                 }
             } else {
-                // Si el proxy es nulo, no podemos notificar al Maestro
-                System.err.println("[WORKER " + workerId + "] MasterCallbackProxy es nulo. No se pueden enviar resultados.");
+                System.err.println("[" + workerJobId + "] ERROR: MasterCallbackProxy es nulo. No se pueden enviar resultados.");
             }
         });
     }

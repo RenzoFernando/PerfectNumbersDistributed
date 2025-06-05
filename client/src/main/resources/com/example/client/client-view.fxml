@@ -10,42 +10,86 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="450.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.client.ClientViewController">
+<!--
+    Referencia al nuevo archivo CSS.
+    Asegúrate de que 'perfectnumbers-styles.css' esté en el mismo directorio
+    que este FXML o ajusta la ruta (ej. "@../styles/perfectnumbers-styles.css" si está en una subcarpeta "styles").
+    El prefijo "@" indica que la ruta es relativa al classpath.
+-->
+<BorderPane prefHeight="650.0" prefWidth="750.0" styleClass="root"
+            stylesheets="@perfectnumbers-styles.css"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.client.ClientViewController">
     <top>
-        <Label text="Búsqueda Distribuida de Números Perfectos" BorderPane.alignment="CENTER">
-            <font>
-                <Font name="System Bold" size="18.0" />
-            </font>
+        <!-- Aplicar clase de estilo al título -->
+        <Label text="Búsqueda Distribuida de Números Perfectos" styleClass="title-label" BorderPane.alignment="CENTER">
             <BorderPane.margin>
-                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                <Insets bottom="15.0" left="10.0" right="10.0" top="5.0" />
             </BorderPane.margin>
         </Label>
     </top>
     <center>
-        <VBox spacing="10.0" BorderPane.alignment="CENTER">
+        <VBox spacing="12.0" BorderPane.alignment="CENTER">
             <BorderPane.margin>
-                <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                <Insets bottom="20.0" left="25.0" right="25.0" top="10.0" />
             </BorderPane.margin>
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
-                        <Label text="Rango Inicio:" minWidth="80"/>
-                        <TextField fx:id="startRangeField" promptText="Ej: 1" HBox.hgrow="ALWAYS" />
+                        <Label text="Rango Inicio:" minWidth="140.0" />
+                        <!-- text-field class se aplica automáticamente por el CSS, pero se puede ser explícito -->
+                        <TextField fx:id="startRangeField" promptText="Ej: 1 (long)" HBox.hgrow="ALWAYS" styleClass="text-field"/>
                     </children>
                 </HBox>
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
-                        <Label text="Rango Fin:" minWidth="80" />
-                        <TextField fx:id="endRangeField" promptText="Ej: 10000" HBox.hgrow="ALWAYS" />
+                        <Label text="Rango Fin:" minWidth="140.0" />
+                        <TextField fx:id="endRangeField" promptText="Ej: 100000 (long)" HBox.hgrow="ALWAYS" styleClass="text-field"/>
                     </children>
                 </HBox>
-                <Button fx:id="searchButton" mnemonicParsing="false" onAction="#handleSearchAction" text="Buscar Números Perfectos" maxWidth="Infinity"/>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <Label text="Nº Workers a Usar:" minWidth="140.0" />
+                        <TextField fx:id="numWorkersField" promptText="Ej: 1 (int)" HBox.hgrow="ALWAYS" styleClass="text-field"/>
+                    </children>
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <!-- button class se aplica automáticamente, pero se puede ser explícito -->
+                        <Button fx:id="refreshStatusButton" mnemonicParsing="false" onAction="#handleRefreshStatusAction" text="Actualizar Estado del Sistema" styleClass="button"/>
+                    </children>
+                    <VBox.margin>
+                        <Insets top="8.0" />
+                    </VBox.margin>
+                </HBox>
+                <!-- Aplicar clases de estilo a los labels de estado -->
+                <Label fx:id="masterStatusLabel" text="Maestro: Desconocido" styleClass="label-status" />
+                <Label fx:id="availableWorkersLabel" text="Workers disponibles: N/A" styleClass="label-status" />
+
+                <Button fx:id="searchButton" mnemonicParsing="false" onAction="#handleSearchAction" text="Buscar Números Perfectos" maxWidth="Infinity" styleClass="button">
+                    <VBox.margin>
+                        <Insets top="15.0" />
+                    </VBox.margin>
+                </Button>
+
+                <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                    <children>
+                        <!-- Aplicar clase de estilo específica para el botón limpiar -->
+                        <Button fx:id="clearLogButton" mnemonicParsing="false" onAction="#handleClearLogAction" text="Limpiar Log" styleClass="button-clear" />
+                    </children>
+                    <VBox.margin>
+                        <Insets top="8.0"/>
+                    </VBox.margin>
+                </HBox>
+
                 <Label text="Resultados y Log:" >
                     <VBox.margin>
-                        <Insets top="10.0" />
+                        <Insets top="12.0" />
                     </VBox.margin>
                 </Label>
-                <TextArea fx:id="resultsTextArea" editable="false" prefHeight="200.0" VBox.vgrow="ALWAYS" wrapText="true"/>
+                <!-- text-area class se aplica automáticamente por el CSS -->
+                <TextArea fx:id="resultsTextArea" editable="false" prefHeight="350.0" VBox.vgrow="ALWAYS" wrapText="true" styleClass="text-area"/>
             </children>
         </VBox>
     </center>

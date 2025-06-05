@@ -1,14 +1,14 @@
+// --- Archivo: worker/src/main/java/com/example/worker/WorkerUtils.java ---
 package com.example.worker;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class WorkerUtils {
-
     /**
      * Obtiene todos los números perfectos en el rango [start, end]
      * @param start Límite inferior (inclusive) del rango
-     * @param end   Límite superior (inclusive) del rango
+     * @param end Límite superior (inclusive) del rango
      * @return Lista de números perfectos encontrados en ese rango
      */
     public static List<Long> getPerfectNumbersInRange(long start, long end) {
@@ -19,8 +19,7 @@ public class WorkerUtils {
 
         // Recorrer todos los números desde actualStart hasta end
         for (long i = actualStart; i <= end; i++) {
-            if (isPerfect(i)) {
-                // Si i es perfecto, agregarlo a la lista
+            if (isPerfect(i)) { // Si i es perfecto, agregarlo a la lista
                 perfects.add(i);
             }
         }
@@ -34,11 +33,9 @@ public class WorkerUtils {
      * @return true si n es perfecto; false en caso contrario
      */
     private static boolean isPerfect(long n) {
-        if (n < 6) {
-            // El primer número perfecto es 6. Si n < 6, no puede ser perfecto.
+        if (n < 6) { // El primer número perfecto es 6. Si n < 6, no puede ser perfecto.
             return false;
         }
-
         // 1 siempre es divisor de n (>1), así que empezamos con sum = 1
         long sum = 1;
         // Para encontrar divisores, solo iteramos hasta la raíz cuadrada de n

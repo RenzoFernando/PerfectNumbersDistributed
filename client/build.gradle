@@ -2,43 +2,51 @@
 plugins {
     id 'java' // Plugin para compilar código Java
     id 'application' // Plugin para ejecutar la aplicación desde Gradle
-    // Añadir el plugin de JavaFX
-    id 'org.openjfx.javafxplugin' version '0.1.0'
+    // Añadir el plugin de JavaFX para gestionar dependencias y tareas de JavaFX
+    id 'org.openjfx.javafxplugin' version '0.1.0' // O la versión más reciente compatible
 }
 
 application {
-    // Clase principal que arranca la aplicación JavaFX
-    mainClass = 'com.example.client.ClientAppLauncher' // Cambiaremos la clase principal
+    // Clase principal que contiene el método main() para lanzar la aplicación JavaFX
+    mainClass = 'com.example.client.ClientAppLauncher'
 }
 
-// Configuración de JavaFX
+// Configuración específica para JavaFX
 javafx {
-    version = "17" // Versión de JavaFX a usar (compatible con Java)
-    modules = [ 'javafx.controls', 'javafx.fxml' ] // Módulos necesarios para la UI
+    version = "17" // Especifica la versión de JavaFX a utilizar (debe ser compatible con tu JDK)
+    modules = [ 'javafx.controls', 'javafx.fxml' ] // Módulos de JavaFX necesarios para la UI
 }
 
 dependencies {
-    implementation project(':PerfectNumbersApp') // Dependencia al subproyecto con los stubs de ICE
-    // com.zeroc:ice:3.7.10 ya se hereda del build.gradle raíz
+    // Dependencia al subproyecto local 'PerfectNumbersApp' que contiene las clases generadas por ICE
+    implementation project(':PerfectNumbersApp')
 
-    // Las dependencias de JavaFX las gestiona el plugin JavaFX,
-    // no hace falta declararlas explícitamente aquí a menos que se necesiten módulos extra
+    // Declarar explícitamente la dependencia de ZeroC Ice.
+    // Aunque se hereda del build.gradle raíz, añadirla aquí puede ayudar a resolver problemas de
+    // visibilidad del classpath para el compilador en este módulo específico,
+    // especialmente para métodos heredados de ObjectPrx como ice_toString().
+    implementation 'com.zeroc:ice:3.7.10'
+
+    // Las dependencias específicas de los módulos de JavaFX (javafx.controls, javafx.fxml)
+    // son gestionadas automáticamente por el plugin 'org.openjfx.javafxplugin'.
 }
 
 jar {
+    // Configuración para el archivo JAR generado (opcional para ejecución con Gradle)
     manifest {
         attributes(
-                'Main-Class': application.mainClass.get() // Indica la clase principal en el manifiesto
+                // Especifica la clase principal en el manifiesto del JAR para hacerlo ejecutable.
+                'Main-Class': application.mainClass.get()
         )
     }
-    // Nota: Crear un JAR "gordo" con JavaFX es más complejo por los binarios nativos.
-    // Por ahora, se ejecuta con Gradle (./gradlew :client:run).
-    // Si se quisiera un JAR distribuible, sería mejor usar plugins como 'badass-jlink-plugin'.
+    // Crear un "fat JAR" (un JAR que incluye todas sus dependencias) es más complejo
+    // con JavaFX debido a los componentes nativos. La forma más simple de ejecutar
+    // durante el desarrollo es usando la tarea 'run' de Gradle: ./gradlew :client:run
+    // Para una distribución, se podrían usar herramientas como jpackage o plugins de Gradle
+    // más especializados como 'badass-jlink-plugin'.
     /*
     from {
-        // Ejemplo de incluir dependencias en el JAR, puede no funcionar bien con JavaFX
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     */
 }
-

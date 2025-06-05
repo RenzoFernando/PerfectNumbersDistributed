@@ -1,0 +1,132 @@
+/* --- Archivo: client/src/main/resources/com/example/client/perfectnumbers-styles.css --- */
+/* Estilos para la aplicación de Búsqueda de Números Perfectos */
+
+/* ========================= */
+/* Fondos y tipografía       */
+/* ========================= */
+.root {
+    -fx-font-family: "Inter", sans-serif;
+    -fx-background-color: #ffffff; /* fondo blanco general */
+    -fx-padding: 16px; /* Unidades consistentes, px es común en CSS JavaFX */
+}
+
+/* ========================= */
+/* Inputs y ChoiceBox (No se usa ChoiceBox aquí, pero se mantiene por consistencia si se añade) */
+/* ========================= */
+.text-field {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 4px;
+    -fx-padding: 4px 8px;
+    -fx-focus-color: transparent; /* Intenta quitar el resaltado azul por defecto de JavaFX */
+    -fx-faint-focus-color: transparent; /* Intenta quitar el resaltado tenue por defecto */
+}
+
+/* Estilo específico para cuando un TextField está enfocado, para dar un feedback sutil */
+.text-field:focused {
+    -fx-border-color: #222222; /* Un color oscuro para el borde cuando está enfocado */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1); /* Sombra sutil */
+}
+
+
+/* ========================= */
+/* Botones                   */
+/* ========================= */
+.button {
+    -fx-background-color: #222222; /* Color de fondo oscuro */
+    -fx-text-fill: #ffffff;      /* Texto blanco */
+    -fx-background-radius: 4px;  /* Esquinas redondeadas */
+    -fx-padding: 8px 15px;       /* Padding aumentado para mejor tacto/clic */
+    -fx-border-width: 0px;       /* Sin borde explícito, el fondo lo define */
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2); /* Sombra sutil */
+    -fx-cursor: hand; /* Cambia el cursor al pasar sobre el botón */
+}
+
+.button:hover {
+    -fx-background-color: #444444; /* Color más claro al pasar el ratón */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 3); /* Sombra más pronunciada */
+}
+
+.button:pressed {
+    -fx-background-color: #111111; /* Color más oscuro al presionar */
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 1); /* Sombra interna */
+}
+
+/* Estilo para botones que podrían ser "secundarios" o de limpieza */
+.button-clear { /* Aplicar esta clase al botón "Limpiar Log" en FXML */
+    -fx-background-color: #f0f0f0;
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
+}
+.button-clear:hover {
+    -fx-background-color: #e0e0e0;
+}
+.button-clear:pressed {
+    -fx-background-color: #d0d0d0;
+}
+
+
+/* ========================= */
+/* Área de Texto (Log/Resultados) */
+/* ========================= */
+.text-area {
+    -fx-background-color: #f9f9f9; /* Un fondo ligeramente gris para el área de texto */
+    -fx-border-color: #dddddd;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-wrap-text: true; /* Ya estaba en FXML pero se puede reforzar aquí */
+}
+
+.text-area .content { /* El contenido interno del TextArea */
+    -fx-background-color: #f9f9f9; /* Asegurar que el fondo interno también lo tenga */
+    -fx-padding: 5px;
+}
+
+/* ScrollPane dentro del TextArea (si aplica, aunque TextArea maneja su propio scroll) */
+.text-area .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.text-area .scroll-bar:vertical,
+.text-area .scroll-bar:horizontal {
+    -fx-background-color: #e0e0e0; /* Color de fondo de la barra de scroll */
+    -fx-background-radius: 2px;
+}
+
+.text-area .scroll-bar .thumb {
+    -fx-background-color: #aaaaaa; /* Color del "pulgar" de la barra de scroll */
+    -fx-background-radius: 2px;
+}
+
+.text-area .scroll-bar .thumb:hover {
+    -fx-background-color: #888888;
+}
+
+/* ========================= */
+/* Labels de Estado          */
+/* ========================= */
+.label-status { /* Aplicar esta clase a masterStatusLabel y availableWorkersLabel */
+    -fx-font-size: 13px;
+    -fx-text-fill: #333333;
+}
+
+.label-status-error { /* Usar esta clase o cambiar dinámicamente si hay error */
+    -fx-text-fill: #c92a2a; /* Rojo para errores */
+    -fx-font-weight: bold;
+}
+
+.label-status-success { /* Usar esta clase o cambiar dinámicamente si hay éxito */
+    -fx-text-fill: #2f9e44; /* Verde para éxito */
+    -fx-font-weight: bold;
+}
+
+/* Titulo principal de la aplicación */
+.title-label { /* Aplicar esta clase al Label del título en FXML */
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111111;
+}

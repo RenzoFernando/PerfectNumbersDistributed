@@ -1,191 +1,266 @@
+// --- Archivo: master/src/main/java/com/example/master/MasterServiceI.java ---
 package com.example.master;
 
-import perfectNumbersApp.*;
-import com.zeroc.Ice.*;
-
-import java.lang.Exception;
+import com.zeroc.Ice.Exception;
+import perfectNumbersApp.*; // Clases generadas por ICE
+import com.zeroc.Ice.*; // Clases base de ICE
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Arrays; // Para Arrays.toString
+import java.util.Collections; // Para Collections.emptyList
+import java.util.Date;
+import java.util.List; // Interfaz para listas
+import java.util.UUID; // Para generar IDs únicos
+import java.util.concurrent.CompletableFuture; // Para programación asíncrona
+import java.util.concurrent.CopyOnWriteArrayList; // Lista segura para concurrencia
 
+/**
+ * Implementación del servicio Maestro (MasterService).
+ */
 public class MasterServiceI implements MasterService {
-
-    // Adapter de Ice para registrar el MasterController y exponer servicios
     private final ObjectAdapter adapter;
-    // Lista concurrente de proxies a los workers registrados
-    private final List<WorkerServicePrx> availableWorkers = new CopyOnWriteArrayList<>();
-    // Proxy al servant del MasterController para recibir resultados de los workers
+    private final List<WorkerServicePrx> registeredWorkers = new CopyOnWriteArrayList<>();
     private final MasterControllerPrx masterControllerProxy;
-    // Servant local que maneja la lógica de conteo y acumulación de resultados
     private final MasterControllerI masterControllerServant;
+    private static final int MAX_WORKERS_TO_USE_FOR_A_JOB = 10; // Límite de workers por tarea
+    private final String masterLogId = "Master-" + UUID.randomUUID().toString().substring(0,4);
 
-    /**
-     * Constructor: crea un nuevo MasterControllerI y lo expone en el adapter.
-     * @param adapter Adapter sobre el que registrar el MasterController servant.
-     * @param communicator Communicator de Ice (no usado directamente aquí, pero se pasa si se necesita).
-     */
+
     public MasterServiceI(ObjectAdapter adapter, Communicator communicator) {
         this.adapter = adapter;
         this.masterControllerServant = new MasterControllerI();
-        // Crear una identidad única para el MasterController servant
         String controllerIdentity = "MasterController-" + UUID.randomUUID().toString();
-        // Registrar el MasterControllerI en el adapter y obtener su proxy
         this.masterControllerProxy = MasterControllerPrx.uncheckedCast(
                 adapter.add(this.masterControllerServant, Util.stringToIdentity(controllerIdentity))
         );
+        System.out.println("["+masterLogId+"] MasterController interno creado: " + controllerIdentity);
     }
 
-    /**
-     * Método remoto que usan los workers para registrarse con el Maestro.
-     * @param workerProxy Proxy al servicio del worker que se registra.
-     * @param current Contexto ICE (no usado aquí).
-     */
     @Override
     public void registerWorker(WorkerServicePrx workerProxy, Current current) {
-        if (workerProxy != null) {
-            String workerString = workerProxy.toString(); /// Representación del worker
-            // Verificar que no esté ya registrado (comparando identidades ICE)
-            if (!availableWorkers.stream().anyMatch(p -> p.ice_getIdentity().equals(workerProxy.ice_getIdentity()))) {
-                availableWorkers.add(workerProxy); // Agregar a la lista de workers disponibles
-                System.out.println("[MAESTRO] Worker registrado: " + workerString);
-                try {
-                    // Hacer un ping para confirmar que el worker está disponible
-                    workerProxy.ice_ping();
-                    System.out.println("[MAESTRO] Ping al worker " + workerString + " exitoso.");
-                } catch (Exception e) {
-                    // Si falla el ping, eliminar al worker registrado y mostrar advertencia
-                    System.err.println("[MAESTRO] Error haciendo ping al worker recién registrado " + workerString + ". Puede que ya no esté disponible. Eliminando.");
-                    availableWorkers.remove(workerProxy);
-                }
-            } else {
-                // Si ya estaba en la lista, solo notificarlo
-                System.out.println("[MAESTRO] Worker " + workerString + " ya estaba registrado.");
+        if (workerProxy == null) {
+            System.err.println("["+masterLogId+"] Intento de registrar worker con proxy nulo. Ignorando.");
+            return;
+        }
+        Identity workerIdentity = workerProxy.ice_getIdentity();
+        String workerStringRep = getProxyStringRepresentation(workerProxy);
+
+        boolean alreadyRegistered = false;
+        for (WorkerServicePrx existingWorker : registeredWorkers) {
+            if (existingWorker.ice_getIdentity().equals(workerIdentity)) {
+                alreadyRegistered = true;
+                break;
+            }
+        }
+
+        if (!alreadyRegistered) {
+            try {
+                workerProxy.ice_ping(); // Ping para asegurar que está activo
+                registeredWorkers.add(workerProxy);
+                System.out.println("["+masterLogId+"] Worker '" + workerIdentity.name + "' (" + workerStringRep + ") registrado (ping OK). Total: " + registeredWorkers.size());
+            } catch (Exception e) {
+                System.err.println("["+masterLogId+"] Error ping worker '" + workerIdentity.name + "' (" + workerStringRep + "): " + e.getClass().getSimpleName() + ". No añadido.");
             }
         } else {
-            // Si el proxy es nulo, registrar no tiene sentido
-            System.err.println("[MAESTRO] Intento de registrar un worker nulo.");
+            System.out.println("["+masterLogId+"] Worker '" + workerIdentity.name + "' (" + workerStringRep + ") ya estaba registrado.");
         }
     }
 
-    /**
-     * Método remoto que el Cliente invoca para solicitar la búsqueda de números perfectos.
-     * Divide el rango en subrangos y envía a los workers disponibles.
-     * @param jobRange Rango completo que el Cliente quiere procesar.
-     * @param clientNotifierProxy Proxy para notificar al Cliente cuando termine.
-     * @param current Contexto ICE (no usado directamente aquí).
-     */
+    @Override
+    public int getActiveWorkerCount(Current current) {
+        System.out.println("["+masterLogId+"] Solicitud `getActiveWorkerCount` del cliente.");
+        List<WorkerServicePrx> workersToRemove = new ArrayList<>();
+        for (WorkerServicePrx worker : registeredWorkers) {
+            try {
+                worker.ice_ping();
+            } catch (LocalException le) {
+                System.err.println("["+masterLogId+"] getActiveWorkerCount: Worker " + getProxyStringRepresentation(worker) + " no respondió (Excepción Local: " + le.getClass().getSimpleName() + "). Removiendo.");
+                workersToRemove.add(worker);
+            } catch (Exception e) {
+                System.err.println("["+masterLogId+"] getActiveWorkerCount: Excepción inesperada ping worker " + getProxyStringRepresentation(worker) + ": " + e.getMessage() + ". Removiendo.");
+                workersToRemove.add(worker);
+            }
+        }
+        if (!workersToRemove.isEmpty()) {
+            registeredWorkers.removeAll(workersToRemove);
+            System.out.println("["+masterLogId+"] getActiveWorkerCount: Removidos " + workersToRemove.size() + " workers inactivos. Registrados ahora: " + registeredWorkers.size());
+        }
+        System.out.println("["+masterLogId+"] Workers activos reportados: " + registeredWorkers.size());
+        return registeredWorkers.size();
+    }
+
     @Override
     public void findPerfectNumbersInRange(
-            perfectNumbersApp.Range jobRange,
+            Range jobRange,
             ClientNotifierPrx clientNotifierProxy,
+            int numWorkersRequestedByClient,
             Current current) {
-        System.out.println("[MAESTRO] Solicitud recibida para el rango: [" + jobRange.start + ", " + jobRange.end + "]");
 
-        // Validar que tengamos un proxy válido para notificar al Cliente
+        String jobLogId = "Job-" + UUID.randomUUID().toString().substring(0, 5);
+        System.out.println("["+masterLogId+"] ("+jobLogId+") Solicitud: Rango [" + jobRange.start + ", " + jobRange.end + "], Workers Solicitados: " + numWorkersRequestedByClient);
+
         if (clientNotifierProxy == null) {
-            System.err.println("[MAESTRO] ClientNotifierPrx es nulo. No se puede notificar al cliente.");
+            System.err.println("["+masterLogId+"] ("+jobLogId+") ERROR CRÍTICO: ClientNotifierPrx es nulo.");
             return;
         }
 
-        // Hacer copia de los workers disponibles en este momento
-        List<WorkerServicePrx> currentWorkers = new ArrayList<>(availableWorkers);
+        List<WorkerServicePrx> workersForThisJob = selectWorkersForTask(numWorkersRequestedByClient, jobLogId);
 
-        // Si no hay workers, notificar al Cliente inmediatamente con arreglo vacío
-        if (currentWorkers.isEmpty()) {
-            System.out.println("[MAESTRO] No hay workers disponibles. Notificando al cliente.");
-            clientNotifierProxy.notifyJobCompletionAsync(jobRange, new long[0], "No hay workers disponibles.", 0L);
+        if (workersForThisJob.isEmpty()) {
+            System.out.println("["+masterLogId+"] ("+jobLogId+") No hay workers activos. Notificando al cliente.");
+            try {
+                clientNotifierProxy.notifyJobCompletionAsync(jobRange, new long[0], "No hay workers activos disponibles.", 0L);
+            } catch (Exception e) {
+                System.err.println("["+masterLogId+"] ("+jobLogId+") Error notificando al cliente (no workers): " + e.getMessage());
+            }
             return;
         }
 
-        long startTime = System.currentTimeMillis(); // Marcar tiempo de inicio
-        // Preparar el controlador para contar las respuestas de cada worker
-        masterControllerServant.resetForNewJob(currentWorkers.size());
+        long jobStartTimeOnMaster = System.currentTimeMillis();
+        masterControllerServant.resetForNewJob(workersForThisJob.size(), jobLogId); // Pasar jobLogId
 
-        // Calcular cantidad total de números a procesar
         long totalNumbersToProcess = jobRange.end - jobRange.start + 1;
-
-        // Validar rango no negativo o vacío
         if (totalNumbersToProcess <= 0) {
-            clientNotifierProxy.notifyJobCompletionAsync(jobRange, new long[0], "Rango inválido.", 0L);
-            masterControllerServant.resetForNewJob(0); // Ajustar latch a 0 para no esperar
+            System.err.println("["+masterLogId+"] ("+jobLogId+") Rango inválido. Notificando cliente.");
+            try {
+                clientNotifierProxy.notifyJobCompletionAsync(jobRange, new long[0], "Rango inválido.", 0L);
+            } catch (Exception e) {
+                System.err.println("["+masterLogId+"] ("+jobLogId+") Error notificando al cliente (rango inválido): " + e.getMessage());
+            }
+            masterControllerServant.resetForNewJob(0, jobLogId);
             return;
         }
 
-        // Calcular cuántos números debe procesar cada worker (redondeo hacia arriba mínimo 1)
-        long numbersPerWorker = Math.max(1, (totalNumbersToProcess + currentWorkers.size() - 1) / currentWorkers.size());
-        long currentStart = jobRange.start; // Puntero al inicio del primer subrango
-        int workersDispatchedCount = 0; // Contador de cuántos workers recibieron tarea
+        long numbersPerWorker = Math.max(1, (totalNumbersToProcess + workersForThisJob.size() - 1) / workersForThisJob.size());
+        long currentSubRangeStart = jobRange.start;
+        int actualWorkersDispatched = 0;
 
-        System.out.println("[MAESTRO] Dividiendo el trabajo entre " + currentWorkers.size() + " workers. Números aprox por worker: " + numbersPerWorker);
+        System.out.println("["+masterLogId+"] ("+jobLogId+") Distribuyendo. Workers seleccionados: " + workersForThisJob.size() + ". Números/worker aprox: " + numbersPerWorker);
 
-        // Asignar subrangos en orden a cada worker
-        for (int i = 0; i < currentWorkers.size(); i++) {
-            if (currentStart > jobRange.end) {
-                break; // Ya se asignó todo el rango
+        for (int i = 0; i < workersForThisJob.size(); i++) {
+            if (currentSubRangeStart > jobRange.end) {
+                System.out.println("["+masterLogId+"] ("+jobLogId+") Rango completo asignado. " + (workersForThisJob.size() - i) + " worker(s) no recibirán tarea.");
+                for (int j = i; j < workersForThisJob.size(); j++) {
+                    masterControllerServant.handleWorkerFailureOrNoTask(getProxyStringRepresentation(workersForThisJob.get(j)));
+                }
+                break;
             }
-            workersDispatchedCount++;
-            WorkerServicePrx worker = currentWorkers.get(i);
-            long currentEnd = Math.min(jobRange.end, currentStart + numbersPerWorker - 1); // No pasar el límite superior
 
-            // Crear el objeto Range para el subrango
-            perfectNumbersApp.Range subRange = new perfectNumbersApp.Range(currentStart, currentEnd);
-            // Generar un ID único para el trabajo en este worker
-            String workerJobId = "worker-" + i + "-job-" + UUID.randomUUID().toString().substring(0, 8);
-            // Representación string para logging (evitar líneas múltiples)
-            String workerStringRep = worker.toString().split("\n")[0]; // Alternativa a ice_toString()
+            WorkerServicePrx worker = workersForThisJob.get(i);
+            long currentSubRangeEnd = Math.min(jobRange.end, currentSubRangeStart + numbersPerWorker - 1);
 
-            System.out.println("[MAESTRO] Enviando subrango [" + subRange.start + ", " + subRange.end + "] al worker " + workerStringRep + " (ID: " + workerJobId + ")");
+            if (currentSubRangeStart > currentSubRangeEnd) {
+                System.out.println("["+masterLogId+"] ("+jobLogId+") Subrango para worker " + getProxyStringRepresentation(worker) + " sería inválido. Ajustando latch.");
+                masterControllerServant.handleWorkerFailureOrNoTask(getProxyStringRepresentation(worker));
+                continue;
+            }
+
+            Range subRange = new Range(currentSubRangeStart, currentSubRangeEnd);
+            String workerJobId = jobLogId + "-W" + (i+1) + "-" + worker.ice_getIdentity().name.substring(0, Math.min(8, worker.ice_getIdentity().name.length()));
+            String workerStringRep = getProxyStringRepresentation(worker);
+            System.out.println("["+masterLogId+"] ("+jobLogId+") Enviando [" + subRange.start + ", " + subRange.end + "] a " + workerStringRep + " (ID Tarea Worker: " + workerJobId + ")");
+
             try {
-                // Llamada asíncrona al worker: procesar subrango y luego notificar al MasterController
                 worker.processSubRangeAsync(subRange, this.masterControllerProxy, workerJobId);
+                actualWorkersDispatched++;
             } catch (Exception e) {
-                // Si falla la llamada al worker, quitarlo de la lista y descontar del latch
-                System.err.println("[MAESTRO] Error al enviar trabajo al worker " + workerStringRep + ": " + e.getMessage());
-                availableWorkers.remove(worker);
-                masterControllerServant.handleWorkerFailure();
+                System.err.println("["+masterLogId+"] ("+jobLogId+") ERROR al enviar a " + workerStringRep + ": " + e.getMessage());
+                masterControllerServant.handleWorkerFailureOrNoTask(getProxyStringRepresentation(worker));
+                // Considerar remover el worker si falla el envío, ya que podría estar caído.
+                // registeredWorkers.remove(worker); // Cuidado con ConcurrentModificationException si no es CopyOnWriteArrayList
             }
-            // Actualizar el inicio para el siguiente subrango
-            currentStart = currentEnd + 1;
+            currentSubRangeStart = currentSubRangeEnd + 1;
         }
 
-        // Si hay más workers que subrangos, descontar el latch para los que no recibieron tarea
-        if (workersDispatchedCount < currentWorkers.size()) {
-            int nonDispatchedWorkers = currentWorkers.size() - workersDispatchedCount;
-            System.out.println("[MAESTRO] " + nonDispatchedWorkers + " workers no recibieron tareas, ajustando el latch.");
-            for (int k = 0; k < nonDispatchedWorkers; k++) {
-                masterControllerServant.handleWorkerFailure();
-            }
+        if (actualWorkersDispatched == 0 && !workersForThisJob.isEmpty()) {
+            System.out.println("["+masterLogId+"] ("+jobLogId+") Ninguna tarea despachada. Reseteando latch.");
+            masterControllerServant.resetForNewJob(0, jobLogId);
         }
 
-        // Verificación adicional de seguridad: si el latch es mayor que la cantidad de workers despachados
-        if (masterControllerServant.getJobCompletionLatchCount() > workersDispatchedCount && workersDispatchedCount > 0) {
-            // Esto no debería ser necesario si resetForNewJob y handleWorkerFailure se llaman correctamente.
-            // Pero como medida de seguridad, si el latch es mayor que los despachados, algo está mal.
-            System.err.println("[MAESTRO] Advertencia: El conteo del latch ("+masterControllerServant.getJobCompletionLatchCount()+") es mayor que los workers despachados ("+workersDispatchedCount+"). El comportamiento puede ser inesperado.");
-        } else if (workersDispatchedCount == 0 && currentWorkers.size() > 0) {
-            // Si había workers pero no se despachó nada (ya manejado antes), asegurar latch en 0
-            masterControllerServant.resetForNewJob(0); // Asegura que el latch esté en 0
-        }
-
-        // Iniciar un proceso asíncrono para esperar a los resultados y luego notificar al Cliente
+        final int finalActualWorkersDispatched = actualWorkersDispatched;
         CompletableFuture.runAsync(() -> {
-            boolean jobCompletedSuccessfully = masterControllerServant.awaitJobCompletion(300_000); // 5 minutos timeout
-            long endTime = System.currentTimeMillis();
-            // Obtener todos los números perfectos encontrados por los workers
+            System.out.println("["+masterLogId+"-BG] ("+jobLogId+") Hilo esperando " + masterControllerServant.getJobCompletionLatchCount() + " resultados (despachados: " + finalActualWorkersDispatched +").");
+            boolean jobCompletedSuccessfully = masterControllerServant.awaitJobCompletion(600_000); // Timeout de 10 minutos
+            long jobEndTimeOnMaster = System.currentTimeMillis();
             long[] allPerfectNumbers = masterControllerServant.getAllFoundPerfectNumbers();
-            String statusMessage = jobCompletedSuccessfully ?
-                    "Trabajo completado exitosamente." :
-                    "Trabajo completado con timeout o errores (algunos workers podrían no haber respondido).";
 
-            System.out.println("[MAESTRO] " + statusMessage + " Enviando resultados consolidados al cliente.");
+            String statusMessage;
+            if (finalActualWorkersDispatched == 0 && !workersForThisJob.isEmpty()) {
+                statusMessage = "No se pudieron despachar tareas a ningún worker.";
+            } else if (workersForThisJob.isEmpty()){
+                statusMessage = "No hay workers activos para procesar la solicitud.";
+            }
+            else {
+                statusMessage = jobCompletedSuccessfully ?
+                        "Trabajo completado. " + finalActualWorkersDispatched + " worker(s) participaron." :
+                        "Trabajo finalizado (timeout o errores). Algunos workers podrían no haber respondido.";
+            }
+            System.out.println("["+masterLogId+"-BG] ("+jobLogId+") " + statusMessage + " Enviando resultados al cliente.");
+
+            // Loggear tiempo total del maestro al archivo
+            try (PrintWriter writer = new PrintWriter(new FileWriter("tiempos_ejecucion.txt", true))) {
+                writer.println("Job ID: " + jobLogId + " - Tiempo Total Procesamiento Maestro: " + (jobEndTimeOnMaster - jobStartTimeOnMaster) + " ms");
+            } catch (IOException e) {
+                System.err.println("["+masterLogId+"-BG] Error escribiendo tiempo total del maestro a archivo: " + e.getMessage());
+            }
+
             try {
-                // Notificar al Cliente con el rango original, los resultados finales, mensaje de estado y tiempo
-                clientNotifierProxy.notifyJobCompletionAsync(jobRange, allPerfectNumbers, statusMessage, endTime - startTime);
+                clientNotifierProxy.notifyJobCompletionAsync(jobRange, allPerfectNumbers, statusMessage, jobEndTimeOnMaster - jobStartTimeOnMaster);
             } catch (Exception e) {
-                System.err.println("[MAESTRO] Error al notificar al cliente: " + e.getMessage());
+                System.err.println("["+masterLogId+"-BG] ("+jobLogId+") Error notificando al cliente: " + e.getMessage());
             }
         });
+    }
+
+    private List<WorkerServicePrx> selectWorkersForTask(int numWorkersRequestedByClient, String jobLogId) {
+        System.out.println("["+masterLogId+"] ("+jobLogId+") selectWorkersForTask: Workers registrados antes de ping: " + registeredWorkers.size());
+        List<WorkerServicePrx> liveWorkersFound = new ArrayList<>();
+        List<WorkerServicePrx> workersToRemoveFromGlobalList = new ArrayList<>();
+
+        for (WorkerServicePrx worker : this.registeredWorkers) {
+            try {
+                worker.ice_ping();
+                liveWorkersFound.add(worker);
+            } catch (LocalException le) {
+                System.err.println("["+masterLogId+"] ("+jobLogId+") selectWorkersForTask: Worker " + getProxyStringRepresentation(worker) + " no respondió (Excepción Local: " + le.getClass().getSimpleName() + "). Removiendo.");
+                workersToRemoveFromGlobalList.add(worker);
+            } catch (Exception e) {
+                System.err.println("["+masterLogId+"] ("+jobLogId+") selectWorkersForTask: Excepción inesperada ping worker " + getProxyStringRepresentation(worker) + ": " + e.getMessage() + ". Removiendo.");
+                workersToRemoveFromGlobalList.add(worker);
+            }
+        }
+
+        if (!workersToRemoveFromGlobalList.isEmpty()) {
+            this.registeredWorkers.removeAll(workersToRemoveFromGlobalList);
+            System.out.println("["+masterLogId+"] ("+jobLogId+") selectWorkersForTask: Removidos " + workersToRemoveFromGlobalList.size() + " workers inactivos. Registrados ahora: " + this.registeredWorkers.size());
+        }
+
+        if (liveWorkersFound.isEmpty()) {
+            System.out.println("["+masterLogId+"] ("+jobLogId+") selectWorkersForTask: No hay workers vivos después de pings.");
+            return Collections.emptyList();
+        }
+
+        int workersToEngage = Math.max(1, numWorkersRequestedByClient);
+        workersToEngage = Math.min(workersToEngage, liveWorkersFound.size());
+        workersToEngage = Math.min(workersToEngage, MAX_WORKERS_TO_USE_FOR_A_JOB);
+
+        System.out.println("["+masterLogId+"] ("+jobLogId+") Info selección: Vivos=" + liveWorkersFound.size() +
+                ", Solicitados=" + numWorkersRequestedByClient +
+                ", LímiteSistema=" + MAX_WORKERS_TO_USE_FOR_A_JOB +
+                ", WorkersAEvaluar=" + workersToEngage);
+
+        return new ArrayList<>(liveWorkersFound.subList(0, workersToEngage));
+    }
+
+    private String getProxyStringRepresentation(ObjectPrx proxy) {
+        if (proxy == null) return "null proxy";
+        try {
+            return proxy.toString().split("\n")[0];
+        } catch (Exception e) {
+            return proxy.toString().split("\n")[0] + " (ice_toString falló)";
+        }
     }
 }
