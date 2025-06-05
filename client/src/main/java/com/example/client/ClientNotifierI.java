@@ -10,6 +10,7 @@ import java.util.concurrent.CompletionStage;
 
 public class ClientNotifierI implements ClientNotifier {
 
+    // Referencia al controlador de la vista para actualizar la UI
     private ClientViewController viewController;
 
     public ClientNotifierI(ClientViewController controller) {
@@ -24,6 +25,7 @@ public class ClientNotifierI implements ClientNotifier {
             long elapsedTimeMillis,
             Current current) {
 
+        // Construir un mensaje con los resultados de la búsqueda de números perfectos
         StringBuilder sb = new StringBuilder();
         sb.append("\n== Notificación Recibida ==\n");
         sb.append("Rango Original: [").append(originalRange.start).append(" - ").append(originalRange.end).append("]\n");
@@ -33,12 +35,15 @@ public class ClientNotifierI implements ClientNotifier {
         sb.append("================================\n");
 
         if (viewController != null) {
+            // Si el controlador existe, agregar resultados a la interfaz y habilitar el botón
             viewController.appendResults(sb.toString());
             viewController.jobFinished();
         } else {
+            // Si no hay controlador (modo consola), imprimir en consola
             System.out.println(sb.toString());
         }
 
+        // Devolver un CompletionStage ya completado, ya que no necesitamos más procesamiento
         return CompletableFuture.completedFuture(null);
     }
 }
