@@ -1,2 +1,9 @@
+// PerfectNumbersDistributed/settings.gradle
 rootProject.name = 'PerfectNumbersDistributed'
+
+// Incluir los subproyectos para que Gradle los reconozca y compile:
+// - client: cliente JavaFX
+// - master: servidor Maestro
+// - worker: proceso Worker
+// - PerfectNumbersApp: stubs generados por ICE
 include 'client', 'master', 'worker', 'PerfectNumbersApp'

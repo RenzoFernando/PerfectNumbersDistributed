@@ -1,24 +1,28 @@
 // PerfectNumbersDistributed/worker/build.gradle
 plugins {
-    id 'java'
-    id 'application'
+    id 'java' // Plugin para compilar código Java
+    id 'application'  // Plugin para ejecutar la aplicación desde Gradle
 }
 
 application {
+    // Clase principal que arranca el Worker
     mainClass = 'com.example.worker.WorkerApp'
 }
 
 dependencies {
+    // Dependencia al subproyecto que contiene los stubs generados por ICE
     implementation project(':PerfectNumbersApp')
-    // La dependencia 'com.zeroc:ice:3.7.10' se hereda.
+    // La dependencia 'com.zeroc:ice:3.7.10' se hereda del build.gradle raíz
 }
 
 jar {
     manifest {
+        // Incluir la clase principal en el manifiesto para que el JAR sea ejecutable
         attributes(
                 'Main-Class': application.mainClass.get()
         )
     }
+    // Empaqueta todas las dependencias en un único JAR ("fat JAR")
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }

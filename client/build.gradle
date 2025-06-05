@@ -1,43 +1,42 @@
 // PerfectNumbersDistributed/client/build.gradle
 plugins {
-    id 'java'
-    id 'application'
+    id 'java' // Plugin para compilar código Java
+    id 'application' // Plugin para ejecutar la aplicación desde Gradle
     // Añadir el plugin de JavaFX
     id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 application {
+    // Clase principal que arranca la aplicación JavaFX
     mainClass = 'com.example.client.ClientAppLauncher' // Cambiaremos la clase principal
 }
 
 // Configuración de JavaFX
 javafx {
-    version = "17" // Usa la misma versión de Java o una compatible con JavaFX
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    version = "17" // Versión de JavaFX a usar (compatible con Java)
+    modules = [ 'javafx.controls', 'javafx.fxml' ] // Módulos necesarios para la UI
 }
 
 dependencies {
-    implementation project(':PerfectNumbersApp')
-    // La dependencia 'com.zeroc:ice:3.7.10' se hereda del build.gradle raíz.
+    implementation project(':PerfectNumbersApp') // Dependencia al subproyecto con los stubs de ICE
+    // com.zeroc:ice:3.7.10 ya se hereda del build.gradle raíz
 
-    // Las dependencias de JavaFX son gestionadas por el plugin,
-    // pero si necesitas una versión específica o más módulos, los añades aquí
-    // normalmente no es necesario con el plugin.
+    // Las dependencias de JavaFX las gestiona el plugin JavaFX,
+    // no hace falta declararlas explícitamente aquí a menos que se necesiten módulos extra
 }
 
 jar {
     manifest {
         attributes(
-                'Main-Class': application.mainClass.get()
+                'Main-Class': application.mainClass.get() // Indica la clase principal en el manifiesto
         )
     }
-    // Para un JAR ejecutable con JavaFX, la creación del "fat JAR" es más compleja
-    // debido a los componentes nativos de JavaFX.
-    // Por ahora, nos enfocaremos en ejecutarlo con Gradle: ./gradlew :client:run
-    // Si necesitas un JAR distribuible, se pueden explorar plugins como 'badass-jlink-plugin'.
-    // La siguiente configuración de fat JAR simple PUEDE NO FUNCIONAR CORRECTAMENTE CON JAVAFX.
+    // Nota: Crear un JAR "gordo" con JavaFX es más complejo por los binarios nativos.
+    // Por ahora, se ejecuta con Gradle (./gradlew :client:run).
+    // Si se quisiera un JAR distribuible, sería mejor usar plugins como 'badass-jlink-plugin'.
     /*
     from {
+        // Ejemplo de incluir dependencias en el JAR, puede no funcionar bien con JavaFX
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     */
