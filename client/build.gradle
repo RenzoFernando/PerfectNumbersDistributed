@@ -1,28 +1,45 @@
 // PerfectNumbersDistributed/client/build.gradle
 plugins {
     id 'java'
-    id 'application' // Para facilitar la ejecución
+    id 'application'
+    // Añadir el plugin de JavaFX
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 application {
-    mainClass = 'com.example.client.ClientApp'
+    mainClass = 'com.example.client.ClientAppLauncher' // Cambiaremos la clase principal
+}
+
+// Configuración de JavaFX
+javafx {
+    version = "17" // Usa la misma versión de Java o una compatible con JavaFX
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
 dependencies {
-    // Dependencia del proyecto que contiene los stubs de Ice generados
     implementation project(':PerfectNumbersApp')
     // La dependencia 'com.zeroc:ice:3.7.10' se hereda del build.gradle raíz.
+
+    // Las dependencias de JavaFX son gestionadas por el plugin,
+    // pero si necesitas una versión específica o más módulos, los añades aquí
+    // normalmente no es necesario con el plugin.
 }
 
-// Configuración para crear un JAR ejecutable (opcional pero útil)
 jar {
     manifest {
         attributes(
                 'Main-Class': application.mainClass.get()
         )
     }
-    // Incluye las dependencias en el JAR (fat jar)
+    // Para un JAR ejecutable con JavaFX, la creación del "fat JAR" es más compleja
+    // debido a los componentes nativos de JavaFX.
+    // Por ahora, nos enfocaremos en ejecutarlo con Gradle: ./gradlew :client:run
+    // Si necesitas un JAR distribuible, se pueden explorar plugins como 'badass-jlink-plugin'.
+    // La siguiente configuración de fat JAR simple PUEDE NO FUNCIONAR CORRECTAMENTE CON JAVAFX.
+    /*
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+    */
 }
+

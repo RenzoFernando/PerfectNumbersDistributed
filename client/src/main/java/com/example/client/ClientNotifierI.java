@@ -1,48 +1,44 @@
 package com.example.client;
 
-// Asegúrate de importar la clase Range correcta de tu paquete generado por Ice
-import perfectNumbersApp.Range; // Correcto
-import perfectNumbersApp.ClientNotifier; // La interfaz generada por Slice
-
+import perfectNumbersApp.ClientNotifier;
+import perfectNumbersApp.Range;
 import com.zeroc.Ice.Current;
-import com.zeroc.Ice.Communicator;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-// La clase implementa perfectNumbersApp.ClientNotifier
 public class ClientNotifierI implements ClientNotifier {
 
-    private final Communicator communicator;
+    private ClientViewController viewController;
 
-    public ClientNotifierI(Communicator communicator) {
-        this.communicator = communicator;
+    public ClientNotifierI(ClientViewController controller) {
+        this.viewController = controller;
     }
 
-    // El método debe coincidir con la firma generada por AMD
     @Override
     public CompletionStage<Void> notifyJobCompletionAsync(
-            perfectNumbersApp.Range originalRange, // Usar el tipo correcto: perfectNumbersApp.Range
-            long[] perfectNumbers, // NameList (sequence<long>) se mapea a long[]
+            Range originalRange,
+            long[] perfectNumbers,
             String statusMessage,
             long elapsedTimeMillis,
             Current current) {
 
-        System.out.println("\n[CLIENTE] == Notificación Recibida ==");
-        // Acceder a los campos de perfectNumbersApp.Range
-        System.out.println("Rango Original: [" + originalRange.start + " - " + originalRange.end + "]");
-        System.out.println("Números Perfectos Encontrados: " + Arrays.toString(perfectNumbers));
-        System.out.println("Mensaje de Estado: " + statusMessage);
-        System.out.println("Tiempo Transcurrido (ms): " + elapsedTimeMillis);
-        System.out.println("================================\n");
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n== Notificación Recibida ==\n");
+        sb.append("Rango Original: [").append(originalRange.start).append(" - ").append(originalRange.end).append("]\n");
+        sb.append("Números Perfectos Encontrados: ").append(Arrays.toString(perfectNumbers)).append("\n");
+        sb.append("Mensaje de Estado: ").append(statusMessage).append("\n");
+        sb.append("Tiempo Transcurrido (ms): ").append(elapsedTimeMillis).append("\n");
+        sb.append("================================\n");
 
-        if (this.communicator != null) {
-            System.out.println("[CLIENTE] Finalizando el cliente después de la notificación.");
-            // Es seguro llamar a shutdown desde un hilo de Ice
-            this.communicator.shutdown();
+        if (viewController != null) {
+            viewController.appendResults(sb.toString());
+            viewController.jobFinished();
+        } else {
+            System.out.println(sb.toString());
         }
-        // Para métodos AMD, se debe devolver un CompletionStage.
+
         return CompletableFuture.completedFuture(null);
     }
 }

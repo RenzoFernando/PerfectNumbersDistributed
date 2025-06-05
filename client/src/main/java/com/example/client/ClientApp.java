@@ -1,73 +1,104 @@
 package com.example.client;
 
-import perfectNumbersApp.*; // Importa todas las clases generadas por Ice
-import com.zeroc.Ice.*;
+import com.zeroc.Ice.Communicator;
+import com.zeroc.Ice.Util;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-import java.lang.Exception;
+import java.io.IOException;
+import java.util.Objects;
 
-public class ClientApp {
-    public static void main(String[] args) {
-        java.util.List<String> extraArgs = new java.util.ArrayList<>();
-        // El archivo de propiedades "client.properties" debe estar en src/main/resources
-        // o en el directorio desde donde se ejecuta la aplicación.
-        try (Communicator communicator = Util.initialize(args, "client.properties", extraArgs)) {
+public class ClientApp extends Application {
 
-            ObjectAdapter adapter = communicator.createObjectAdapter("ClientNotifierAdapter");
-            // Pasamos el communicator al servant para que pueda apagarlo.
-            ClientNotifierI notifierServant = new ClientNotifierI(communicator);
-            ObjectPrx servantProxy = adapter.addWithUUID(notifierServant);
-            ClientNotifierPrx clientNotifierPrx = ClientNotifierPrx.checkedCast(servantProxy);
-            adapter.activate();
+    private Communicator communicator;
+    private ClientViewController controller;
 
-            ObjectPrx baseMasterPrx = communicator.propertyToProxy("MasterService.Proxy");
-            if (baseMasterPrx == null) {
-                // Fallback si no está en properties, o puedes lanzar error directamente
-                System.err.println("Advertencia: MasterService.Proxy no encontrado en client.properties. Intentando conexión directa.");
-                baseMasterPrx = communicator.stringToProxy("MasterService:default -h localhost -p 10000");
-                if (baseMasterPrx == null) {
-                    throw new Error("Proxy del maestro es nulo. Verifica la configuración o que el maestro esté corriendo.");
-                }
-            }
-
-            MasterServicePrx masterServicePrx = MasterServicePrx.checkedCast(baseMasterPrx);
-            if (masterServicePrx == null) {
-                throw new Error("Proxy del maestro inválido después del checkedCast.");
-            }
-
-            long startRange = 1;
-            long endRange = 10000;
-
-            if (extraArgs.size() >= 2) {
-                try {
-                    startRange = Long.parseLong(extraArgs.get(0));
-                    endRange = Long.parseLong(extraArgs.get(1));
-                } catch (NumberFormatException e) {
-                    System.err.println("Argumentos de rango inválidos: '" + extraArgs.get(0) + "', '" + extraArgs.get(1) + "'. Usando rango por defecto: " + startRange + "-" + endRange);
-                }
-            } else {
-                System.out.println("Uso: ... com.example.client.ClientApp <inicio> <fin>");
-                System.out.println("Usando rango por defecto: " + startRange + "-" + endRange);
-            }
-
-            perfectNumbersApp.Range jobRange = new perfectNumbersApp.Range(startRange, endRange); // Usar el tipo correcto
-            System.out.println("[CLIENTE] Solicitando números perfectos en el rango [" + jobRange.start + ", " + jobRange.end + "]");
-
-            // findPerfectNumbersInRange no es AMD en Slice, su contraparte async en el proxy es generada automáticamente por Ice.
-            masterServicePrx.findPerfectNumbersInRangeAsync(jobRange, clientNotifierPrx);
-
-            System.out.println("[CLIENTE] Petición enviada al maestro. Esperando notificación...");
-            communicator.waitForShutdown();
-            System.out.println("[CLIENTE] Cliente finalizado.");
-
-        } catch (InitializationException e) {
-            System.err.println("[CLIENTE] Error de inicialización de Ice: " + e.getMessage());
-            e.printStackTrace();
-        } catch (LocalException e) {
-            System.err.println("[CLIENTE] Error local de Ice: " + e.getMessage());
-            e.printStackTrace();
+    @Override
+    public void init() throws Exception {
+        super.init();
+        // Inicializar el Communicator de Ice.
+        // Los argumentos de línea de comandos (si los pasaste a Application.launch)
+        // están disponibles a través de getParameters().getRaw().
+        // Sin embargo, para simplificar, leeremos client.properties directamente.
+        try {
+            communicator = Util.initialize(new String[]{}, "client.properties");
+            System.out.println("[CLIENTE-APP] Communicator Ice inicializado.");
         } catch (Exception e) {
-            System.err.println("[CLIENTE] Error inesperado: " + e.getMessage());
+            System.err.println("[CLIENTE-APP] Error inicializando Communicator Ice: " + e.getMessage());
             e.printStackTrace();
+            // Si falla la inicialización de Ice, podríamos querer terminar la app JavaFX
+            Platform.exit();
         }
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        if (communicator == null) {
+            System.err.println("[CLIENTE-APP] Communicator no inicializado, no se puede iniciar la UI.");
+            Platform.exit();
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource("/com/example/client/client-view.fxml")));
+            Parent root = loader.load();
+
+            controller = loader.getController();
+            if (controller != null) {
+                controller.setCommunicator(communicator);
+                controller.setApp(this); // Pasar referencia de la app al controlador
+            } else {
+                System.err.println("[CLIENTE-APP] Error: No se pudo obtener el controlador FXML.");
+                Platform.exit();
+                return;
+            }
+
+            primaryStage.setTitle("Cliente - Búsqueda de Números Perfectos");
+            primaryStage.setScene(new Scene(root, 600, 450));
+            primaryStage.setOnCloseRequest(event -> {
+                // Asegurarse de que el communicator se cierre al cerrar la ventana.
+                // El método stop() de la aplicación se llamará automáticamente.
+                System.out.println("[CLIENTE-APP] Solicitud de cierre de ventana.");
+            });
+            primaryStage.show();
+        } catch (IOException e) {
+            System.err.println("[CLIENTE-APP] Error cargando FXML: " + e.getMessage());
+            e.printStackTrace(); // Imprime la traza completa para ver la causa raíz
+            Platform.exit();
+        } catch (Exception e) {
+            System.err.println("[CLIENTE-APP] Error inesperado al iniciar la UI: " + e.getMessage());
+            e.printStackTrace();
+            Platform.exit();
+        }
+    }
+
+    @Override
+    public void stop() throws Exception {
+        System.out.println("[CLIENTE-APP] Deteniendo la aplicación JavaFX.");
+        if (controller != null) {
+            controller.shutdownIce(); // Llamar a un método en el controlador para limpiar Ice.
+        }
+        if (communicator != null) {
+            try {
+                communicator.destroy();
+                System.out.println("[CLIENTE-APP] Communicator Ice destruido.");
+            } catch (Exception e) {
+                System.err.println("[CLIENTE-APP] Error destruyendo Communicator Ice: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        super.stop();
+        System.out.println("[CLIENTE-APP] Aplicación detenida.");
+        // Forzar salida si es necesario, ya que los hilos de Ice podrían seguir activos.
+        System.exit(0);
+    }
+
+    // Método para que el controlador pueda solicitar el cierre de la aplicación
+    public void requestShutdown() {
+        Platform.runLater(Platform::exit);
     }
 }
