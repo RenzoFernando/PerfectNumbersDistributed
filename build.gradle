@@ -1,20 +1,30 @@
+// PerfectNumbersDistributed/build.gradle
 plugins {
+	// Declara el plugin de Ice Builder para que esté disponible en los subproyectos,
+	// pero no lo aplica aquí directamente.
 	id 'com.zeroc.gradle.ice-builder.slice' version '1.5.1' apply false
+}
+
+allprojects {
+	repositories {
+		mavenCentral()
+	}
 }
 
 subprojects {
 	apply plugin: 'java'
 
-	group   = 'com.example'
+	group = 'com.example'
 	version = '0.1-SNAPSHOT'
 
 	java {
-		toolchain { languageVersion = JavaLanguageVersion.of(17) }
+		toolchain {
+			languageVersion = JavaLanguageVersion.of(17)
+		}
 	}
 
-	repositories { mavenCentral() }
-
 	dependencies {
+		// Todos los subproyectos que usen Ice necesitarán esta dependencia.
 		implementation 'com.zeroc:ice:3.7.10'
 	}
 }

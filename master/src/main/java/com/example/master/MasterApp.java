@@ -1,21 +1,32 @@
 package com.example.master;
 
-import perfectNumbersApp.*;
 import com.zeroc.Ice.*;
+
+import java.lang.Exception;
 
 public class MasterApp {
     public static void main(String[] args) {
-        try (Communicator ic = Util.initialize(args, "master.properties")) {
-            ObjectAdapter adapter =
-                    ic.createObjectAdapterWithEndpoints("MasterAdapter",
-                            "default -h 0.0.0.0 -p 10000");
+        try (Communicator communicator = Util.initialize(args, "master.properties")) {
+            ObjectAdapter adapter = communicator.createObjectAdapter("MasterAdapter");
 
-            MasterServiceI servant = new MasterServiceI(adapter);
-            adapter.add(servant, Util.stringToIdentity("MasterService"));
+            MasterServiceI masterServant = new MasterServiceI(adapter, communicator);
+            adapter.add(masterServant, Util.stringToIdentity("MasterService"));
+
             adapter.activate();
+            System.out.println("[MAESTRO] Maestro iniciado y escuchando...");
 
-            System.out.println("Maestro listo (puerto 10000)");
-            ic.waitForShutdown();
+            communicator.waitForShutdown();
+            System.out.println("[MAESTRO] Maestro finalizado.");
+
+        } catch (InitializationException e) {
+            System.err.println("[MAESTRO] Error de inicialización de Ice: " + e.getMessage());
+            e.printStackTrace();
+        } catch (LocalException e) {
+            System.err.println("[MAESTRO] Error local de Ice: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("[MAESTRO] Error inesperado: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

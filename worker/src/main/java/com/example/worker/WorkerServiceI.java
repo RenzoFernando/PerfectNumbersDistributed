@@ -1,35 +1,53 @@
 package com.example.worker;
 
-import perfectNumbersApp.*;
-import com.zeroc.Ice.*;
+import perfectNumbersApp.Range; // Correcto
+import perfectNumbersApp.MasterControllerPrx;
+import perfectNumbersApp.WorkerService; // La interfaz generada
 
+import com.zeroc.Ice.Current;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public class WorkerServiceI implements WorkerService {
 
     @Override
-    public void processSubRange(
-            Range subRangeToProcess,
+    public CompletionStage<Void> processSubRangeAsync(
+            perfectNumbersApp.Range subRangeToProcess, // Usar el tipo correcto
             MasterControllerPrx masterCallbackProxy,
             String workerId,
             Current current) {
 
-        System.out.println("[WORKER " + workerId + "] Procesando subrango: "
-                + subRangeToProcess.start + " a " + subRangeToProcess.end);
+        System.out.println("[WORKER " + workerId + "] Recibido subrango para procesar: [" +
+                subRangeToProcess.start + ", " + subRangeToProcess.end + "]");
 
-        List<Long> perfectNumbers = WorkerUtils.getPerfectNumbersInRange(
-                subRangeToProcess.start, subRangeToProcess.end);
+        return CompletableFuture.runAsync(() -> {
+            List<Long> foundPerfectNumbersList = WorkerUtils.getPerfectNumbersInRange(
+                    subRangeToProcess.start, subRangeToProcess.end);
 
-        long[] result = new long[perfectNumbers.size()];
-        for (int i = 0; i < perfectNumbers.size(); i++) {
-            result[i] = perfectNumbers.get(i);
-        }
+            long[] perfectNumbersArray = new long[foundPerfectNumbersList.size()];
+            for (int i = 0; i < foundPerfectNumbersList.size(); i++) {
+                perfectNumbersArray[i] = foundPerfectNumbersList.get(i);
+            }
 
-        // NumberList result = new NumberList(resultArray); <- No lo reconoce.......
+            System.out.println("[WORKER " + workerId + "] Números perfectos encontrados en el subrango: " +
+                    Arrays.toString(perfectNumbersArray));
 
-        // TODO: Verificar que esta comunicación sea asincronica (Parece ser que no)
-        masterCallbackProxy.submitWorkerResults(workerId, subRangeToProcess, result);
-
-        System.out.println("[WORKER " + workerId + "] Finalizó subrango. Resultados enviados.");
+            if (masterCallbackProxy != null) {
+                try {
+                    System.out.println("[WORKER " + workerId + "] Enviando resultados al MasterController...");
+                    masterCallbackProxy.submitWorkerResultsAsync(workerId, subRangeToProcess, perfectNumbersArray);
+                    System.out.println("[WORKER " + workerId + "] Resultados enviados.");
+                } catch (Exception e) {
+                    System.err.println("[WORKER " + workerId + "] Error al enviar resultados al MasterController: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            } else {
+                System.err.println("[WORKER " + workerId + "] MasterCallbackProxy es nulo. No se pueden enviar resultados.");
+            }
+        });
     }
 }

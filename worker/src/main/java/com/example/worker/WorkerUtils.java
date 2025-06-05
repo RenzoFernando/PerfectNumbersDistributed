@@ -1,13 +1,17 @@
 package com.example.worker;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class WorkerUtils {
 
     public static List<Long> getPerfectNumbersInRange(long start, long end) {
         List<Long> perfects = new ArrayList<>();
-        for (long i = start; i <= end; i++) {
+        // Los números perfectos son positivos, el primero es 6.
+        // Ajustar el inicio si es menor que 2 para optimizar un poco.
+        long actualStart = Math.max(start, 2L);
+
+        for (long i = actualStart; i <= end; i++) {
             if (isPerfect(i)) {
                 perfects.add(i);
             }
@@ -16,16 +20,21 @@ public class WorkerUtils {
     }
 
     private static boolean isPerfect(long n) {
-        if (n < 2) return false;
-        long sum = 1;
-        long sqrt = (long) Math.sqrt(n);
-        for (long i = 2; i <= sqrt; i++) {
+        if (n < 6) { // El primer número perfecto es 6.
+            return false;
+        }
+        long sum = 1; // 1 es divisor de todos los números > 1
+        // Iterar solo hasta la raíz cuadrada para optimizar
+        for (long i = 2; i * i <= n; i++) {
             if (n % i == 0) {
                 sum += i;
-                long div = n / i;
-                if (div != i) sum += div;
+                if (i * i != n) { // Evitar sumar la raíz cuadrada dos veces si n es un cuadrado perfecto
+                    sum += n / i;
+                }
             }
         }
+        // Un número es perfecto si la suma de sus divisores propios es igual al número.
+        // Y n != 1 (aunque ya cubierto por n < 6)
         return sum == n;
     }
 }

@@ -1,9 +1,25 @@
+// PerfectNumbersDistributed/master/build.gradle
 plugins {
     id 'java'
+    id 'application'
 }
 
-ext.mainClass = 'com.example.master.MasterApp'
+application {
+    mainClass = 'com.example.master.MasterApp'
+}
 
 dependencies {
     implementation project(':PerfectNumbersApp')
+    // La dependencia 'com.zeroc:ice:3.7.10' se hereda.
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': application.mainClass.get()
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }

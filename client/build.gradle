@@ -1,9 +1,28 @@
+// PerfectNumbersDistributed/client/build.gradle
 plugins {
     id 'java'
+    id 'application' // Para facilitar la ejecución
 }
 
-ext.mainClass = 'com.example.client.ClientApp'
+application {
+    mainClass = 'com.example.client.ClientApp'
+}
 
 dependencies {
+    // Dependencia del proyecto que contiene los stubs de Ice generados
     implementation project(':PerfectNumbersApp')
+    // La dependencia 'com.zeroc:ice:3.7.10' se hereda del build.gradle raíz.
+}
+
+// Configuración para crear un JAR ejecutable (opcional pero útil)
+jar {
+    manifest {
+        attributes(
+                'Main-Class': application.mainClass.get()
+        )
+    }
+    // Incluye las dependencias en el JAR (fat jar)
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }

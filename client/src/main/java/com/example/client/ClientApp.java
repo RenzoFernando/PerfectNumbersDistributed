@@ -1,32 +1,73 @@
 package com.example.client;
 
-import perfectNumbersApp.*;
+import perfectNumbersApp.*; // Importa todas las clases generadas por Ice
 import com.zeroc.Ice.*;
+
+import java.lang.Exception;
 
 public class ClientApp {
     public static void main(String[] args) {
-        try (Communicator ic = Util.initialize(args, "client.properties")) {
+        java.util.List<String> extraArgs = new java.util.ArrayList<>();
+        // El archivo de propiedades "client.properties" debe estar en src/main/resources
+        // o en el directorio desde donde se ejecuta la aplicación.
+        try (Communicator communicator = Util.initialize(args, "client.properties", extraArgs)) {
 
-            // 1.  Adaptador para callbacks
-            ObjectAdapter adapter = ic.createObjectAdapter("NotifierAdapter");
-            ClientNotifierI cb = new ClientNotifierI();
-            ObjectPrx prx     = adapter.addWithUUID(cb);
-            ClientNotifierPrx notifierPrx = ClientNotifierPrx.checkedCast(prx);
+            ObjectAdapter adapter = communicator.createObjectAdapter("ClientNotifierAdapter");
+            // Pasamos el communicator al servant para que pueda apagarlo.
+            ClientNotifierI notifierServant = new ClientNotifierI(communicator);
+            ObjectPrx servantProxy = adapter.addWithUUID(notifierServant);
+            ClientNotifierPrx clientNotifierPrx = ClientNotifierPrx.checkedCast(servantProxy);
             adapter.activate();
 
-            // 2.  Proxy remoto al maestro
-            MasterServicePrx master = MasterServicePrx.checkedCast(
-                    ic.stringToProxy("MasterService:default -h localhost -p 10000"));
+            ObjectPrx baseMasterPrx = communicator.propertyToProxy("MasterService.Proxy");
+            if (baseMasterPrx == null) {
+                // Fallback si no está en properties, o puedes lanzar error directamente
+                System.err.println("Advertencia: MasterService.Proxy no encontrado en client.properties. Intentando conexión directa.");
+                baseMasterPrx = communicator.stringToProxy("MasterService:default -h localhost -p 10000");
+                if (baseMasterPrx == null) {
+                    throw new Error("Proxy del maestro es nulo. Verifica la configuración o que el maestro esté corriendo.");
+                }
+            }
 
-            if (master == null)
-                throw new Error("No se encontró el proxy del maestro");
+            MasterServicePrx masterServicePrx = MasterServicePrx.checkedCast(baseMasterPrx);
+            if (masterServicePrx == null) {
+                throw new Error("Proxy del maestro inválido después del checkedCast.");
+            }
 
-            // 3.  Enviar tarea
-            master.findPerfectNumbersInRange(
-                    new Range(1, 100_000), notifierPrx);
+            long startRange = 1;
+            long endRange = 10000;
 
-            System.out.println("Petición enviada; esperando callback…");
-            ic.waitForShutdown();
+            if (extraArgs.size() >= 2) {
+                try {
+                    startRange = Long.parseLong(extraArgs.get(0));
+                    endRange = Long.parseLong(extraArgs.get(1));
+                } catch (NumberFormatException e) {
+                    System.err.println("Argumentos de rango inválidos: '" + extraArgs.get(0) + "', '" + extraArgs.get(1) + "'. Usando rango por defecto: " + startRange + "-" + endRange);
+                }
+            } else {
+                System.out.println("Uso: ... com.example.client.ClientApp <inicio> <fin>");
+                System.out.println("Usando rango por defecto: " + startRange + "-" + endRange);
+            }
+
+            perfectNumbersApp.Range jobRange = new perfectNumbersApp.Range(startRange, endRange); // Usar el tipo correcto
+            System.out.println("[CLIENTE] Solicitando números perfectos en el rango [" + jobRange.start + ", " + jobRange.end + "]");
+
+            // findPerfectNumbersInRange no es AMD en Slice, su contraparte async en el proxy es generada automáticamente por Ice.
+            masterServicePrx.findPerfectNumbersInRangeAsync(jobRange, clientNotifierPrx);
+
+            System.out.println("[CLIENTE] Petición enviada al maestro. Esperando notificación...");
+            communicator.waitForShutdown();
+            System.out.println("[CLIENTE] Cliente finalizado.");
+
+        } catch (InitializationException e) {
+            System.err.println("[CLIENTE] Error de inicialización de Ice: " + e.getMessage());
+            e.printStackTrace();
+        } catch (LocalException e) {
+            System.err.println("[CLIENTE] Error local de Ice: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("[CLIENTE] Error inesperado: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

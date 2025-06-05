@@ -1,253 +1,180 @@
-# Created by https://www.toptal.com/developers/gitignore/api/java,visualbasic,intellij,gradle,maven
-# Edit at https://www.toptal.com/developers/gitignore?templates=java,visualbasic,intellij,gradle,maven
+# ###################################################################
+# ### Archivo .gitignore Comprensivo para Proyectos Java con Gradle y ZeroC Ice ###
+# ###################################################################
+#
+# Este archivo especifica intencionalmente los archivos y directorios
+# que Git debe ignorar. Está diseñado para ser útil en un entorno de
+# equipo donde los desarrolladores pueden usar diferentes IDEs y OS.
 
-### Intellij ###
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
-.idea
+# ######################
+# ## Archivos de Build (Gradle y otros)
+# ######################
+# Los directorios de build contienen archivos compilados y artefactos
+# que se generan en cada construcción. No deben ser versionados.
 
-# User-specific stuff
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
+# Directorio de build de Gradle (generalmente en la raíz y en cada submódulo)
+**/build/
 
-# AWS User-specific
-.idea/**/aws.xml
+# Directorio .gradle (caché y archivos de trabajo de Gradle)
+.gradle/
 
-# Generated files
-.idea/**/contentModel.xml
+# Archivos de caché de nombres de tareas de Gradle
+.gradletasknamecache
 
-# Sensitive or high-churn files
-.idea/**/dataSources/
-.idea/**/dataSources.ids
-.idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xml
-.idea/**/dynamic.xml
-.idea/**/uiDesigner.xml
-.idea/**/dbnavigator.xml
+# Archivos de heap dump de Java (generados en caso de OutOfMemoryError)
+*.hprof
 
-# Gradle
-.idea/**/gradle.xml
-.idea/**/libraries
-
-# Gradle and Maven with auto-import
-# When using Gradle or Maven with auto-import, you should exclude module files,
-# since they will be recreated, and may cause churn.  Uncomment if using
-# auto-import.
-# .idea/artifacts
-# .idea/compiler.xml
-# .idea/jarRepositories.xml
-# .idea/modules.xml
-# .idea/*.iml
-# .idea/modules
-# *.iml
-# *.ipr
-
-# CMake
-cmake-build-*/
-
-# Mongo Explorer plugin
-.idea/**/mongoSettings.xml
-
-# File-based project format
-*.iws
-
-# IntelliJ
-out/
-
-# mpeltonen/sbt-idea plugin
-.idea_modules/
-
-# JIRA plugin
-atlassian-ide-plugin.xml
-
-# Cursive Clojure plugin
-.idea/replstate.xml
-
-# SonarLint plugin
-.idea/sonarlint/
-
-# Crashlytics plugin (for Android Studio and IntelliJ)
-com_crashlytics_export_strings.xml
-crashlytics.properties
-crashlytics-build.properties
-fabric.properties
-
-# Editor-based Rest Client
-.idea/httpRequests
-
-# Android studio 3.1+ serialized cache file
-.idea/caches/build_file_checksums.ser
-
-### Intellij Patch ###
-# Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
-
-# *.iml
-# modules.xml
-# .idea/misc.xml
-# *.ipr
-
-# Sonarlint plugin
-# https://plugins.jetbrains.com/plugin/7973-sonarlint
-.idea/**/sonarlint/
-
-# SonarQube Plugin
-# https://plugins.jetbrains.com/plugin/7238-sonarqube-community-plugin
-.idea/**/sonarIssues.xml
-
-# Markdown Navigator plugin
-# https://plugins.jetbrains.com/plugin/7896-markdown-navigator-enhanced
-.idea/**/markdown-navigator.xml
-.idea/**/markdown-navigator-enh.xml
-.idea/**/markdown-navigator/
-
-# Cache file creation bug
-# See https://youtrack.jetbrains.com/issue/JBR-2257
-.idea/$CACHE_FILE$
-
-# CodeStream plugin
-# https://plugins.jetbrains.com/plugin/12206-codestream
-.idea/codestream.xml
-
-# Azure Toolkit for IntelliJ plugin
-# https://plugins.jetbrains.com/plugin/8053-azure-toolkit-for-intellij
-.idea/**/azureSettings.xml
-
-### Java ###
-# Compiled class file
-*.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Archivos de empaquetado (JARs, WARs, EARs)
+# Estos se generan con 'gradle build' o 'gradle jar', etc.
+# Es mejor reconstruirlos que versionarlos, a menos que sea una distribución final específica.
 *.jar
 *.war
-*.nar
 *.ear
 *.zip
+*.tar
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Archivos compilados de Java
+*.class
+
+# ######################
+# ## Archivos de IDEs
+# ######################
+
+# --- IntelliJ IDEA ---
+# Archivos y directorios específicos de IntelliJ IDEA.
+.idea/
+*.iml
+*.iws
+modules.xml
+# Archivos de workspace, pueden ser personales
+# Descomentar si se prefiere no versionar en absoluto
+# .idea/workspace.xml
+# .idea/shelf/
+
+# --- Visual Studio Code ---
+# Archivos y directorios específicos de VS Code.
+.vscode/
+
+# --- Eclipse ---
+# Archivos y directorios específicos de Eclipse.
+.classpath
+.project
+.settings/
+# Directorio de salida de compilación de Eclipse (si no se usa Gradle para todo)
+bin/
+
+# --- NetBeans ---
+# Archivos y directorios específicos de NetBeans.
+nbproject/private/
+build/ # Ya cubierto por la regla general de Gradle
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ######################
+# ## Archivos de Sistema Operativo
+# ######################
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+# Archivos temporales de macOS
+.TemporaryItems
+.Trashes
+
+# --- Windows ---
+# Miniaturas de imágenes
+Thumbs.db
+ehthumbs.db
+# Configuración de carpetas
+Desktop.ini
+# Papelera de reciclaje en recursos compartidos
+$RECYCLE.BIN/
+# Archivos de accesos directos de Windows
+*.lnk
+
+# ######################
+# ## Archivos de Log
+# ######################
+*.log
+logs/
+# Archivos de log de errores de la JVM (hs_err_pid*)
 hs_err_pid*
 replay_pid*
 
-### Maven ###
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
-# https://github.com/takari/maven-wrapper#usage-without-binary-jar
-.mvn/wrapper/maven-wrapper.jar
+# ######################
+# ## Archivos de ZeroC Ice
+# ######################
+#
+# NOTA IMPORTANTE SOBRE ICE:
+# Los archivos generados por `slice2java` (stubs, skeletons, helpers)
+# DEBEN ser generados por el plugin de Gradle `ice-builder.slice`
+# dentro del directorio `build` de tu módulo `PerfectNumbersApp` (o como lo hayas llamado).
+# La regla `**/build/` ya cubre estos archivos generados, por lo que
+# NO necesitas ignorarlos explícitamente aquí SI tu proyecto está configurado correctamente.
+#
+# Si por alguna razón tuvieras archivos de Ice generados manualmente en `src/`,
+# deberías reconsiderar tu configuración de build.
+# No obstante, si fuera estrictamente necesario ignorar patrones específicos:
+#
+# Ejemplo (NO RECOMENDADO SI USAS EL PLUGIN DE GRADLE CORRECTAMENTE):
+# *Prx.java
+# *I.java
+# *Helper.java
+# Holder.java
+#
+# En este proyecto, `PerfectNumbersApp/build/generated-src/` es donde se generan,
+# y eso ya está cubierto por `**/build/`.
 
-# Eclipse m2e generated files
-# Eclipse Core
-.project
-# JDT-specific (Eclipse Java Development Tools)
-.classpath
+# ######################
+# ## Archivos de Dependencias (Maven/Gradle Local)
+# ######################
+#
+# Usualmente, las dependencias se gestionan con Gradle y se descargan en la caché
+# global de usuario de Gradle, no dentro del proyecto.
+# La carpeta `.gradle/` ya ignora la caché específica del proyecto.
 
-### VisualBasic ###
-## Ignore Visual Studio temporary files, build results, and
-## files generated by popular Visual Studio add-ons.
-.DS_Store
-.Trashes
-*.vbw
-*.csi
-*.exp
-*.lib
-*.lvw
-*.dca
-*.scc
-*.tmp
-*.exe
-*.bat
+# ######################
+# ## Archivos Específicos de Herramientas y Temporales
+# ######################
+
+# Archivos de configuración local que no deben ser compartidos
+# (ej. local.properties si tuvieras uno para claves de API, etc.)
+# local.properties
+# *.local
+
+# Archivos de backup de editores comunes
+*~
 *.bak
-*.old
-*.enc
-*.key
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
+*.swp
+*.swo
 
-# Folder config file
-Desktop.ini
+# ######################
+# ## Documentación Generada (si aplica)
+# ######################
+# Si generas Javadoc o similar en un directorio específico que no sea 'build'
+# docs/api/
 
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
+# ######################
+# ## Otros
+# ######################
 
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
+# Archivos de Papelera de Linux
+.Trash-*
 
-# Windows shortcuts
-*.lnk
+# Archivos de testeo específicos (si no están en build)
+# Por ejemplo, reportes de Cobertura, JaCoCo si se generan fuera de /build
+# cobertura.ser
+# jacoco.exec
 
-# =========================
-# Operating System Files
-# =========================
+# Archivos de variables de entorno (común en algunos frameworks)
+.env
 
-# OSX
-# =========================
+# Archivos de configuración de editores como EditorConfig si no se desea versionar
+# .editorconfig
 
-.AppleDouble
-.LSOverride
-
-# Thumbnails
-._*
-
-# Files that might appear in the root of a volume
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.VolumeIcon.icns
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-
-### Gradle ###
-.gradle
-**/build/
-!src/**/build/
-
-# Ignore Gradle GUI config
-gradle-app.setting
-
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
-
-# Avoid ignore Gradle wrappper properties
-!gradle-wrapper.properties
-
-# Cache of project
-.gradletasknamecache
-
-# Eclipse Gradle plugin generated files
-# Eclipse Core
-# JDT-specific (Eclipse Java Development Tools)
-
-### Gradle Patch ###
-# Java heap dump
-*.hprof
-
-# End of https://www.toptal.com/developers/gitignore/api/java,visualbasic,intellij,gradle,maven
+# Fin del archivo .gitignore
