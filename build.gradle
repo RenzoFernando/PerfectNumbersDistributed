@@ -26,6 +26,6 @@ subprojects {
 
 	dependencies {
 		// Todos los subproyectos que usen Ice necesitan esta dependencia
-		implementation 'com.zeroc:ice:3.7.10'
+		implementation 'com.zeroc:ice:3.7.6'
 	}
 }
