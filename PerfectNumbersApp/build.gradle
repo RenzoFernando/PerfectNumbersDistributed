@@ -16,6 +16,7 @@ slice {
         // Si quisiéramos opciones extra para slice2java (por ejemplo debug), se añadirían así:
         // args = ["--debug"]
     }
+    iceHome = file("/opt/Ice-3.7.6")
 }
 
 // Este módulo no es una aplicación ejecutable, solo genera la biblioteca de stubs de ICE
