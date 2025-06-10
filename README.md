@@ -1,3 +1,5 @@
+# <p align="center">BÚSQUEDA DISTRIBUIDA DE NÚMEROS PERFECTOS</p>
+
 ## Descripción
 
 <p align="justify">Este proyecto implementa un sistema distribuido para la eficiente búsqueda de números perfectos dentro de un rango numérico dado. Utilizando el framework de comunicación ZeroC Ice y una arquitectura Cliente-Maestro-Trabajadores (Master-Workers), el sistema está diseñado para escalar el procesamiento de manera paralela, distribuyendo la carga computacional entre múltiples nodos.</p>
@@ -11,13 +13,13 @@
 <p align="justify">La comunicación entre estos componentes se maneja de forma asíncrona a través de Ice, lo que garantiza un flujo de trabajo no bloqueante y una mayor eficiencia en la interacción del sistema. El proyecto está construido con Gradle y utiliza JavaFX para la interfaz gráfica del cliente, asegurando un entorno de desarrollo y ejecución robusto y modular.</p>
 
 ## Integrantes
-- Daniel Esteban Arcos Cerón &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [A00400760]
+- Daniel Esteban Arcos Cerón &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [A00400760]
 
 - Luna Catalina Martínez Vásquez &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00401964]
 
 - Renzo Fernando Mosquera Daza &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00401681]
 
-- Hideki Tamura Hernández &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00348618]
+- Hideki Tamura Hernández &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00348618]
 
 ## Estructura del proyecto
 ```plaintext
