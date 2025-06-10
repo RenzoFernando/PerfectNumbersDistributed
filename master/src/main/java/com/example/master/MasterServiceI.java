@@ -103,7 +103,7 @@ public class MasterServiceI implements MasterService {
         System.out.println("["+masterLogId+"] ("+jobLogId+") Solicitud: Rango [" + jobRange.start + ", " + jobRange.end + "], Workers Solicitados: " + numWorkersRequestedByClient);
 
         if (clientNotifierProxy == null) {
-            System.err.println("["+masterLogId+"] ("+jobLogId+") ERROR CRÍTICO: ClientNotifierPrx es nulo.");
+            System.err.println("["+masterLogId+"] ("+jobLogId+") ERROR CRITICO: ClientNotifierPrx es nulo.");
             return;
         }
 

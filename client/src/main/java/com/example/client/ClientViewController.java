@@ -13,7 +13,7 @@ import javafx.fxml.FXML; // Para enlazar con elementos del archivo FXML
 import javafx.scene.Node; // Nodo base para elementos de UI (usado en animación)
 import javafx.scene.control.Button; // Botón de JavaFX
 import javafx.scene.control.Label; // Etiqueta de JavaFX
-import javafx.scene.control.TextArea; // Área de texto de JavaFX
+import javafx.scene.control.TextArea; // Area de texto de JavaFX
 import javafx.scene.control.TextField; // Campo de texto de JavaFX
 import javafx.util.Duration; // Para especificar la duración de las animaciones
 
