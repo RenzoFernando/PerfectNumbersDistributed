@@ -1,86 +1,69 @@
-// --- Archivo: App.ice ---
 // PerfectNumbersDistributed/App.ice
-// Define el módulo para la aplicación de números perfectos.
-// Este módulo contendrá todas las interfaces y estructuras de datos
-// necesarias para la comunicación entre el cliente, el maestro y los trabajadores.
+// Módulo que define las interfaces y estructuras para la aplicación de números perfectos
 module perfectNumbersApp {
 
-    // Estructura para definir un rango numérico con un inicio y un fin.
-    // Se usa 'long' para poder manejar rangos extensos.
+    // Estructura que representa un rango numérico [start, end]
+    // Se usa long para permitir rangos grandes
     struct Range {
         long start; // Límite inferior del rango.
         long end;   // Límite superior del rango.
     };
 
-    // Secuencia de números 'long', que Ice traducirá a un arreglo long[] en Java.
-    // Se usará para listas de números perfectos.
+    // Secuencia de long que Ice traduce a long[] en Java
+    // Se usa para listas de números perfectos
     sequence<long> NumberList;
 
-    // Interfaz que el Maestro usará para notificar al Cliente.
-    // El Cliente implementará esta interfaz.
+    // Interfaz que el Maestro usa para notificar al Cliente
     interface ClientNotifier {
-        // Método para notificar al cliente la finalización de un trabajo.
-        // Es asíncrono (AMD) para que el Maestro no se bloquee esperando al Cliente.
-        // Parámetros:
-        //  originalRange: El rango completo solicitado originalmente por el cliente.
-        //  perfectNumbers: Lista de números perfectos encontrados.
-        //  statusMessage: Un mensaje indicando el estado de la operación (ej. "Completado", "Error").
-        //  elapsedTimeMillis: Tiempo total que tomó el procesamiento desde la perspectiva del Maestro.
+        // AMD (asíncrono sin bloqueo) para no detener al Maestro
+        // originalRange: rango completo solicitado
+        // perfectNumbers: lista de perfectos encontrados
+        // statusMessage: mensaje de estado (ej. "Completado")
+        // elapsedTimeMillis: tiempo total desde perspectiva del Maestro
         ["amd"] void notifyJobCompletion(Range originalRange,
                                          NumberList perfectNumbers,
                                          string statusMessage,
                                          long elapsedTimeMillis);
     };
 
-    // Interfaz que los Trabajadores usarán para enviar resultados parciales al Maestro.
-    // El Maestro implementará esta interfaz.
+    // Interfaz que los Workers usan para enviar resultados parciales al Maestro
     interface MasterController {
-        // Método para que un trabajador envíe los resultados de su subrango.
-        // Es asíncrono (AMD) para que el Trabajador no se bloquee esperando al Maestro.
-        // Parámetros:
-        //  workerId: Identificador único del trabajo/worker que envía el resultado.
-        //  processedSubRange: El subrango que este worker procesó.
-        //  perfectNumbersFound: Lista de números perfectos encontrados en ese subrango.
-        //  workerProcessingTimeMillis: Tiempo que le tomó al worker procesar su subrango.
+        // AMD para que el Worker no espere respuesta
+        // workerId: ID de tarea asignado por el Maestro
+        // processedSubRange: rango local procesado por el Worker
+        // perfectNumbersFound: perfectos hallados en ese subrango
+        // workerProcessingTimeMillis: tiempo que tardó el Worker
         ["amd"] void submitWorkerResults(string workerId,
                                          Range processedSubRange,
                                          NumberList perfectNumbersFound,
                                          long workerProcessingTimeMillis);
     };
 
-    // Interfaz que el Maestro usará para enviar trabajo a los Trabajadores.
-    // Los Trabajadores implementarán esta interfaz.
+    // Interfaz que el Maestro invoca en cada Worker para procesar un subrango
     interface WorkerService {
-        // Método para que el Maestro asigne un subrango a un trabajador.
-        // Es asíncrono (AMD) para que el Maestro no se bloquee esperando al Trabajador.
-        // Parámetros:
-        //  subRangeToProcess: El subrango específico que este worker debe analizar.
-        //  masterCallbackProxy: Proxy al MasterController para que el worker envíe sus resultados.
-        //  workerId: Identificador único para este trabajo/subtarea.
+        // AMD para no bloquear al Maestro
+        // subRangeToProcess: rango a procesar
+        // masterCallbackProxy: proxy al MasterController para enviar resultados
+        // workerId: ID único de la sub-tarea
         ["amd"] void processSubRange(Range subRangeToProcess,
                                      MasterController* masterCallbackProxy,
                                      string workerId);
     };
 
-    // Interfaz principal del servicio Maestro.
-    // El Cliente interactuará con esta interfaz.
+    // Interfaz principal del Maestro, usada por el Cliente
     interface MasterService {
-        // Método principal invocado por el Cliente para iniciar la búsqueda.
-        // Parámetros:
-        //  jobRange: El rango completo en el que buscar números perfectos.
-        //  clientNotifierProxy: Proxy al ClientNotifier del cliente para enviar la respuesta final.
-        //  numWorkersToUse: Número de workers que el cliente desea que se utilicen para esta tarea.
+       // Inicia la búsqueda de perfectos en un rango
+       // jobRange: rango completo a analizar
+       // clientNotifierProxy: proxy al ClientNotifier para devolver resultados
+       // numWorkersToUse: cuántos Workers usar
         void findPerfectNumbersInRange(Range jobRange,
                                        ClientNotifier* clientNotifierProxy,
                                        int numWorkersToUse);
 
-        // Método para que los Trabajadores se registren con el Maestro.
-        // Parámetros:
-        //  workerProxy: Proxy al servicio del worker que se está registrando.
+        // Permite a un Worker registrarse con el Maestro
         void registerWorker(WorkerService* workerProxy);
 
-        // Método para que el cliente consulte cuántos workers están activos.
-        // Devuelve el número de workers actualmente registrados y que responden a un ping.
+        // Consulta el número de Workers activos (responden a ping)
         int getActiveWorkerCount();
     };
 };

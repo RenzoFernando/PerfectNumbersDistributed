@@ -1,23 +1,19 @@
 // PerfectNumbersDistributed/PerfectNumbersApp/build.gradle
 plugins {
-    // Aplica el plugin de Java (necesario para compilar los stubs generados por ICE)
-    id 'java'
-    // Aplica el plugin de Ice Builder para este subproyecto
-    id 'com.zeroc.gradle.ice-builder.slice'
+    id 'java' // Permite compilar los stubs generados por ICE en este módulo
+    id 'com.zeroc.gradle.ice-builder.slice' // Plugin para procesar archivos .ice y generar código Java
 }
 
 // Configuración específica para la compilación de Slice a Java
 slice {
     java {
-        // Especifica la ubicación del archivo .ice
-        // Como App.ice está en la raíz del proyecto (un nivel arriba de PerfectNumbersApp),
-        // usamos '../App.ice'.
+        // Indica dónde está el archivo App.ice que define las interfaces
         files = [file('../App.ice')]
-        // Si quisiéramos opciones extra para slice2java (por ejemplo debug), se añadirían así:
-        // args = ["--debug"]
+        // Aquí se podrían agregar opciones extra, como args = ['--verbose']
     }
-    iceHome = file("/opt/Ice-3.7.6")
+    // Para la sala de laboratorios que necesitamos la ruta específica de ICE
+    // iceHome = file("/opt/Ice-3.7.6")
 }
 
-// Este módulo no es una aplicación ejecutable, solo genera la biblioteca de stubs de ICE
-// La dependencia 'com.zeroc:ice:3.7.10' se hereda del build.gradle principal del proyecto
+// Este subproyecto solo genera la librería de stubs de Ice, no es una app ejecutable
+// La dependencia com.zeroc:ice:3.7.10 se hereda del build.gradle principal del proyecto

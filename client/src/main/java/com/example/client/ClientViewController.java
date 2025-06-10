@@ -2,7 +2,7 @@ package com.example.client;
 
 import perfectNumbersApp.*; // Clases generadas por ICE (Range, MasterServicePrx, etc.)
 import com.zeroc.Ice.Communicator; // Comunicador principal de ICE
-import com.zeroc.Ice.LocalException; // Excepciones locales de ICE (ej. problemas de conexión)
+import com.zeroc.Ice.LocalException; // Excepciones locales de ICE
 import com.zeroc.Ice.ObjectAdapter; // Para crear servants que reciben llamadas
 import com.zeroc.Ice.ObjectPrx; // Proxy base de ICE
 import com.zeroc.Ice.Util; // Utilidades de Ice
@@ -17,6 +17,7 @@ import javafx.scene.control.TextArea; // Area de texto de JavaFX
 import javafx.scene.control.TextField; // Campo de texto de JavaFX
 import javafx.util.Duration; // Para especificar la duración de las animaciones
 
+// Para los archivos
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,11 +25,13 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
-// import java.util.Map; // No se usa actualmente, se puede quitar si no hay planes
 
-
+/**
+ * Controlador de la UI JavaFX del cliente
+ * Gestiona eventos de botones, comunicación con el Maestro y actualiza la vista
+ */
 public class ClientViewController {
-    // --- Campos FXML Inyectados (@FXML) ---
+    // --- Componentes de la interfaz inyectados desde FXML ---
     @FXML private TextField startRangeField;
     @FXML private TextField endRangeField;
     @FXML private TextField numWorkersField;
@@ -39,7 +42,7 @@ public class ClientViewController {
     @FXML private Label availableWorkersLabel;
     @FXML private TextArea resultsTextArea;
 
-    // --- Componentes de ICE y Estado ---
+    // --- Componentes de ICE y Estado interno ---
     private Communicator communicator;
     private MasterServicePrx masterServicePrx;
     private ClientNotifierPrx clientNotifierPrx;
@@ -55,12 +58,17 @@ public class ClientViewController {
     private static final String DEFAULT_START_RANGE = "1";
     private static final String DEFAULT_END_RANGE = "100000";
 
+    /**
+     * Recibe el Ice Communicator desde ClientApp y arranca la inicialización en segundo plano
+     */
     public void setCommunicator(Communicator communicator) {
         this.communicator = communicator;
         if (this.communicator != null) {
             System.out.println("[CLIENTE-CTRL] setCommunicator: Communicator recibido. Iniciando componentes de Ice en hilo de fondo...");
+            // Iniciar adaptadores y proxies en un hilo de fondo
             new Thread(this::initializeIceComponents).start();
         } else {
+            // Si falló, mostrar error y deshabilitar botones
             logToUIAndConsole("[ERROR-CTRL] setCommunicator: Communicator es NULO. No se pueden inicializar proxies.", true);
             Platform.runLater(() -> {
                 updateStatusLabels("Maestro: Error crítico (Communicator nulo)", "error",
@@ -71,13 +79,21 @@ public class ClientViewController {
         }
     }
 
+    /**
+     * Guarda referencia a la aplicación principal para poder cerrarla desde aquí
+     */
     public void setApp(ClientApp app) {
         this.clientApp = app;
     }
 
+    /**
+     * Llamado automáticamente tras cargar el FXML
+     * Inicializa campos de texto y agrega manejadores de teclas
+     */
     @FXML
     public void initialize() {
         System.out.println("[CLIENTE-CTRL] Controlador FXML (ClientViewController): método initialize() llamado por FXMLLoader.");
+        // Ajustar valores iniciales
         startRangeField.setText(DEFAULT_START_RANGE);
         endRangeField.setText(DEFAULT_END_RANGE);
         numWorkersField.setText(String.valueOf(DEFAULT_NUM_WORKERS));
@@ -95,6 +111,9 @@ public class ClientViewController {
         numWorkersField.setOnKeyPressed(event -> { if (event.getCode().toString().equals("ENTER") && !searchButton.isDisabled()) handleSearchAction(); });
     }
 
+    /**
+     * Hilo de fondo que configura el adaptador para recibir notificaciones del Maestro.
+     */
     private void initializeIceComponents() {
         System.out.println("[ICE-INIT-THREAD] Hilo de inicialización de componentes Ice del cliente iniciado.");
         if (this.communicator == null) {
@@ -102,6 +121,7 @@ public class ClientViewController {
             return;
         }
         try {
+            // Crear adaptador local y registrar servant
             logToUIAndConsolePlatform("[ICE-INIT-THREAD] Creando y activando adaptador ClientNotifierAdapter...", false);
             notifierAdapter = communicator.createObjectAdapter("ClientNotifierAdapter");
             ClientNotifierI notifierServant = new ClientNotifierI(this);
@@ -110,15 +130,18 @@ public class ClientViewController {
             notifierAdapter.activate();
 
             logToUIAndConsolePlatform("[CLIENTE-CTRL] Adaptador ClientNotifier local activado en: " + Arrays.toString(clientNotifierPrx.ice_getEndpoints()), false);
+
+            // Una vez listo, habilitar el botón de refrescar estado en la UI
             Platform.runLater(() -> {
                 refreshStatusButton.setDisable(false);
                 logToUI("[CLIENTE-CTRL] Listo. Presione 'Actualizar Estado del Sistema' para conectar con el Maestro.");
-                animateNodeBriefly(refreshStatusButton); // Pequeña animación al botón
-                handleRefreshStatusAction();
+                animateNodeBriefly(refreshStatusButton);
+                handleRefreshStatusAction(); // Auto-refresco inicial
             });
             System.out.println("[ICE-INIT-THREAD] Adaptador ClientNotifier configurado y activado.");
 
         } catch (LocalException e) {
+            // Mostrar errores de inicialización de Cliente
             String errorMsg = "[ERROR-CTRL] Error local de Ice durante la inicialización del ClientNotifier: " + e.getClass().getSimpleName() + " - " + e.getMessage();
             logToUIAndConsole(errorMsg, true, e);
             Platform.runLater(() -> {
@@ -128,6 +151,7 @@ public class ClientViewController {
                 refreshStatusButton.setDisable(false);
             });
         } catch (Exception e) {
+            // Mostrar errores de inicialización de Ice
             String errorMsg = "[ERROR-CTRL] Error inesperado durante la inicialización del ClientNotifier: " + e.getMessage();
             logToUIAndConsole(errorMsg, true, e);
             Platform.runLater(() -> {
@@ -139,6 +163,9 @@ public class ClientViewController {
         }
     }
 
+    /**
+     * Manejador del botón 'Actualizar Estado'. Consulta al Maestro su disponibilidad.
+     */
     @FXML
     private void handleRefreshStatusAction() {
         animateNodeBriefly(refreshStatusButton);
@@ -148,12 +175,14 @@ public class ClientViewController {
         updateStatusLabels("Maestro: Conectando...", "normal",
                 "Workers: Consultando...", "normal");
 
+        // Ejecutar consulta en otro hilo para no bloquear la UI
         CompletableFuture.supplyAsync(() -> {
             boolean currentMasterConnectedAttempt = false;
             int currentActiveWorkersAttempt = -1;
             String currentMasterProxyInfoAttempt = "No disponible";
             try {
                 if (communicator == null) throw new IllegalStateException("Communicator de Ice no está inicializado.");
+                // Obtener proxy del Maestro y hacer ping
                 ObjectPrx baseMasterPrx = communicator.propertyToProxy("MasterService.Proxy");
                 if (baseMasterPrx == null) {
                     logToUIAndConsolePlatform("[WARN-CTRL] MasterService.Proxy no encontrado en client.properties. Usando stringToProxy con localhost:10000.", false);
@@ -162,7 +191,7 @@ public class ClientViewController {
                 if (baseMasterPrx != null) {
                     masterServicePrx = MasterServicePrx.checkedCast(baseMasterPrx);
                     if (masterServicePrx != null) {
-                        masterServicePrx.ice_ping();
+                        masterServicePrx.ice_ping(); // Verificar conexión
                         currentMasterProxyInfoAttempt = masterServicePrx.toString().split("\n")[0];
                         logToUIAndConsolePlatform("[CLIENTE-CTRL] Ping al Maestro (" + currentMasterProxyInfoAttempt + ") exitoso. Obteniendo número de workers...", false);
                         currentActiveWorkersAttempt = masterServicePrx.getActiveWorkerCount();
@@ -193,6 +222,7 @@ public class ClientViewController {
             }
             return new MasterConnectionStatus(currentMasterConnectedAttempt, currentActiveWorkersAttempt, currentMasterProxyInfoAttempt);
         }).whenCompleteAsync((status, ex) -> {
+            // Volver a UI thread para actualizar etiquetas y botones
             refreshStatusButton.setDisable(false);
             this.masterConnected = status.connected;
             this.lastKnownWorkerCount = status.workerCount;
@@ -223,6 +253,9 @@ public class ClientViewController {
         }, Platform::runLater);
     }
 
+    /**
+     * Manejador del botón 'Buscar'. Valida entradas y envía petición al Maestro.
+     */
     @FXML
     private void handleSearchAction() {
         animateNodeBriefly(searchButton);
@@ -237,6 +270,7 @@ public class ClientViewController {
             return;
         }
 
+        // Parsear campos de texto
         long start, end;
         int workersToUse;
         try {
@@ -251,6 +285,7 @@ public class ClientViewController {
             return;
         }
 
+        // Validar rango y workers
         if (start <= 0 || end <= 0 || start > end) {
             logToUIAndConsole("[ERROR-CTRL] Rango inválido: Inicio y Fin deben ser > 0, y Fin >= Inicio.", true);
             animateNodeBriefly(startRangeField);
@@ -266,6 +301,7 @@ public class ClientViewController {
             logToUIAndConsole("[WARN-CTRL] Solicitó " + workersToUse + " workers. El maestro podría usar un máximo de 10.", false);
         }
 
+        // Preparar petición
         Range jobRange = new Range(start, end);
         logToUIAndConsole("[CLIENTE-CTRL] Solicitando búsqueda en [" + jobRange.start + ", " + jobRange.end + "] usando hasta " + workersToUse + " worker(s).", false);
         searchButton.setDisable(true);
@@ -273,6 +309,7 @@ public class ClientViewController {
 
         clientRequestStartTime = System.currentTimeMillis();
 
+        // Enviar petición en background
         CompletableFuture.runAsync(() -> {
             try {
                 masterServicePrx.findPerfectNumbersInRange(jobRange, clientNotifierPrx, workersToUse);
@@ -295,6 +332,9 @@ public class ClientViewController {
         });
     }
 
+    /**
+     * Borra el log de resultados cuando el usuario presiona el botón correspondiente.
+     */
     @FXML
     private void handleClearLogAction() {
         animateNodeBriefly(clearLogButton);
@@ -304,6 +344,9 @@ public class ClientViewController {
         }
     }
 
+    /**
+     * Detiene el temporizador del cliente y devuelve la duración en ms.
+     */
     public long stopClientTimerAndGetDuration() {
         if (clientRequestStartTime > 0) {
             long duration = System.currentTimeMillis() - clientRequestStartTime;
@@ -313,6 +356,9 @@ public class ClientViewController {
         return 0;
     }
 
+    /**
+     * Escribe tiempos y detalles de la ejecución en un archivo de texto.
+     */
     public void writeTimesToFile(Range range, long[] perfectNumbers, String statusMsg, long masterTime, long clientTime) {
         try (PrintWriter writer = new PrintWriter(new FileWriter("tiempos_ejecucion.txt", true))) {
             writer.println("--- INICIO EJECUCION: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date()) + " ---");
@@ -330,11 +376,17 @@ public class ClientViewController {
         }
     }
 
+    /**
+     * Agrega nuevos resultados al log de la UI.
+     */
     public void appendResults(String message) {
         logToUIAndConsolePlatform(message, false);
         animateNodeBriefly(resultsTextArea); // Animar el área de texto cuando recibe nuevos resultados
     }
 
+    /**
+     * Lógica a ejecutar cuando un trabajo termina: habilita botones y lo indica en UI.
+     */
     public void jobFinished() {
         Platform.runLater(() -> {
             refreshStatusButton.setDisable(false);
@@ -344,6 +396,9 @@ public class ClientViewController {
         });
     }
 
+    /**
+     * Agrega mensaje al área de resultados, o imprímelo si es nulo.
+     */
     public void logToUI(String message) {
         if (resultsTextArea != null) {
             resultsTextArea.appendText(message + "\n");
@@ -352,6 +407,9 @@ public class ClientViewController {
         }
     }
 
+    /**
+     * Muestra mensaje en consola y UI; permite incluir excepciones.
+     */
     private void logToUIAndConsole(String message, boolean isError) {
         logToUIAndConsole(message, isError, null);
     }
@@ -419,6 +477,9 @@ public class ClientViewController {
         }
     }
 
+    /**
+     * Destruye el adaptador de notificaciones al cerrar la aplicación.
+     */
     public void shutdownIce() {
         logToUIAndConsolePlatform("[CLIENTE-CTRL] Solicitando cierre de adaptador Ice.", false);
         if (notifierAdapter != null) {
@@ -431,10 +492,12 @@ public class ClientViewController {
         }
     }
 
+    // Clase interna para almacenar estado de conexión del Maestro
     private static class MasterConnectionStatus {
-        final boolean connected;
-        final int workerCount;
-        final String proxyInfo;
+        final boolean connected;      // Si se pudo conectar y pingear
+        final int workerCount;        // Workers activos reportados
+        final String proxyInfo;       // Info del proxy usado
+
         MasterConnectionStatus(boolean connected, int workerCount, String proxyInfo) {
             this.connected = connected;
             this.workerCount = workerCount;

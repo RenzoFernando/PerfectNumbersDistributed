@@ -10,9 +10,8 @@ application {
 }
 
 dependencies {
-    // Dependencia al subproyecto que contiene los stubs generados por ICE
-    implementation project(':PerfectNumbersApp')
-    // La dependencia 'com.zeroc:ice:3.7.10' se hereda del build.gradle raíz
+    implementation project(':PerfectNumbersApp')// Usa los stubs generados por ICE de PerfectNumbersApp
+    // La dependencia de Ice (com.zeroc:ice:3.7.10) se hereda del build.gradle raíz
 }
 
 jar {
@@ -22,7 +21,7 @@ jar {
                 'Main-Class': application.mainClass.get()
         )
     }
-    // Empaquetar todas las dependencias en el mismo JAR (JAR "gordo")
+    // Incluir todas las dependencias en el mismo JAR (JAR "gordo")
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }

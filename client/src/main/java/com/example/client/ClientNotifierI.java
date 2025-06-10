@@ -1,9 +1,9 @@
 // --- Archivo: client/src/main/java/com/example/client/ClientNotifierI.java ---
 package com.example.client;
 
-import perfectNumbersApp.ClientNotifier;
-import perfectNumbersApp.Range;
-import com.zeroc.Ice.Current;
+import perfectNumbersApp.ClientNotifier; // Interfaz generada por Slice para notificaciones del maestro
+import perfectNumbersApp.Range; // Clase que describe el rango de búsqueda
+import com.zeroc.Ice.Current; // Contexto de la llamada Ice
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -14,13 +14,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Implementación del servant ClientNotifier.
- * Este objeto es invocado por el Maestro para notificar al cliente sobre la finalización de un trabajo.
+ * Implementación del servant ClientNotifier
+ * Este objeto lo invoca el Maestro para notificar al cliente sobre la finalización de un trabajo
  */
 public class ClientNotifierI implements ClientNotifier {
     // Referencia al controlador de la vista para actualizar la UI
     private ClientViewController viewController;
 
+    // Constructor recibe el controlador de la vista JavaFX
     public ClientNotifierI(ClientViewController controller) {
         this.viewController = controller;
     }
@@ -33,9 +34,10 @@ public class ClientNotifierI implements ClientNotifier {
             long elapsedTimeMillisMaster, // Tiempo reportado por el maestro
             Current current) {
 
+        // Detener el temporizador en el cliente y obtener tiempo de ejecución
         long clientSideTotalTime = viewController.stopClientTimerAndGetDuration(); // Obtener tiempo del cliente
 
-        // Construir un mensaje con los resultados de la búsqueda de números perfectos
+        // Construir un mensaje con los resultados de la búsqueda
         StringBuilder sb = new StringBuilder();
         sb.append("\n== NOTIFICACIÓN DE TRABAJO COMPLETADO RECIBIDA DEL MAESTRO ==\n");
         sb.append("Rango Original Solicitado: [").append(originalRange.start).append(" - ").append(originalRange.end).append("]\n");
@@ -45,10 +47,11 @@ public class ClientNotifierI implements ClientNotifier {
         sb.append("Tiempo Total de Ejecución (Cliente): ").append(clientSideTotalTime).append(" ms\n");
         sb.append("============================================================\n");
 
-        // Actualizar UI y registrar en archivo
+        // Si el controlador de la UI existe, actualizar vista y escribir tiempos desde ahí
         if (viewController != null) {
-            viewController.appendResults(sb.toString());
-            viewController.jobFinished(); // Habilitar botones, etc.
+            viewController.appendResults(sb.toString()); // Mostrar resultados en la interfaz
+            viewController.jobFinished(); // Habilitar botones
+            // Guardar tiempos en archivo desde el controlador
             viewController.writeTimesToFile(originalRange, perfectNumbers, statusMessage, elapsedTimeMillisMaster, clientSideTotalTime);
         } else {
             // Si no hay controlador (modo consola o error), imprimir en consola y archivo
@@ -59,11 +62,12 @@ public class ClientNotifierI implements ClientNotifier {
                 writer.println("--- FIN EJECUCIÓN (SIN UI CONTROLLER) ---");
                 writer.println();
             } catch (IOException e) {
+                // Mostrar error si falla la escritura en archivo de logs
                 System.err.println("[ClientNotifierI] Error escribiendo tiempos a archivo (sin UI): " + e.getMessage());
             }
         }
 
-        // Devolver un CompletionStage ya completado, ya que no necesitamos más procesamiento asíncrono aquí
+        // Devolver un CompletionStage ya completado, ya que no hay más trabajo asíncrono aquí
         return CompletableFuture.completedFuture(null);
     }
 }
