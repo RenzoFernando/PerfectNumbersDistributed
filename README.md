@@ -11,16 +11,16 @@
 <p align="justify">La comunicación entre estos componentes se maneja de forma asíncrona a través de Ice, lo que garantiza un flujo de trabajo no bloqueante y una mayor eficiencia en la interacción del sistema. El proyecto está construido con Gradle y utiliza JavaFX para la interfaz gráfica del cliente, asegurando un entorno de desarrollo y ejecución robusto y modular.</p>
 
 ## Integrantes
-- Daniel Esteban Arcos Cerón &nbsp;&nbsp;&nbsp;&nbsp; [A00400760]
+- Daniel Esteban Arcos Cerón &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [A00400760]
 
-- Luna Catalina Martínez Vásquez &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00401964]
+- Luna Catalina Martínez Vásquez &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00401964]
 
 - Renzo Fernando Mosquera Daza &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00401681]
 
-- Hideki Tamura Hernández &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00348618]
+- Hideki Tamura Hernández &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00348618]
 
 ## Estructura del proyecto
-
+```plaintext
 PerfectNumbersDistributed/
 ├── build.gradle
 ├── settings.gradle
@@ -55,6 +55,7 @@ PerfectNumbersDistributed/
     ├── build.gradle
     ├── bin/
     └── build/
+```
 
 ## Instrucciones de ejecución
 
