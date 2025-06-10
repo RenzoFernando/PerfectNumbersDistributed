@@ -34,16 +34,16 @@ PerfectNumbersDistributed/
 │   │   ├── ClientAppLauncher.java
 │   │   ├── ClientNotifierI.java
 │   │   └── ClientViewController.java
-│   └── bin/main/
-│       ├── client.properties      # Configuración Ice del cliente
-│       └── client-view.fxml       # Interfaz gráfica (asegúrate de que exista)
+│   └── src/main/resources/
+│       ├── client.properties
+│       └── client-view.fxml
 ├── master/
 │   ├── build.gradle
 │   ├── src/main/java/com/example/master/
 │   │   ├── MasterApp.java
 │   │   ├── MasterControllerI.java
 │   │   └── MasterServiceI.java
-│   └── bin/main/
+│   └── src/main/resources/
 │       └── master.properties
 ├── worker/
 │   ├── build.gradle
@@ -51,7 +51,7 @@ PerfectNumbersDistributed/
 │   │   ├── WorkerApp.java
 │   │   ├── WorkerServiceI.java
 │   │   └── WorkerUtils.java
-│   └── bin/main/
+│   └── src/main/resources/
 │       └── worker.properties
 └── PerfectNumbersApp/
     ├── build.gradle
@@ -87,6 +87,12 @@ gradlew build
 ### 1. Ejecución del sistema
 
 <p align="justify">Luego de tener en cuenta las anteriores recomendaciones se deben seguir los siguientes pasos:</p>
+
+Ejecutar el comando para el slice:
+
+```bash
+gradlew.bat :PerfectNumbersApp:build
+```
 
 <p align="justify">Debe ejecutar los componentes en un orden específico: primero el Maestro, luego los Workers, y finalmente el Cliente. Abra la terminal para cada componente.</p>
 
