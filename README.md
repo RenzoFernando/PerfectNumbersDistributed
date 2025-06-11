@@ -35,7 +35,8 @@ PerfectNumbersDistributed/
 │   │   ├── ClientNotifierI.java
 │   │   └── ClientViewController.java
 │   └── src/main/resources/
-│       ├── client.properties
+│   │   └── client.properties
+│   └── src/main/resources/com/example/client/
 │       └── client-view.fxml
 ├── master/
 │   ├── build.gradle
