@@ -95,7 +95,7 @@ PerfectNumbersDistributed/
 ```
 
 ## Requisitos
-- Java 11 o superior
+- Java 17
 - Gradle 7.5+
 - ZeroC Ice 3.7.x
 
