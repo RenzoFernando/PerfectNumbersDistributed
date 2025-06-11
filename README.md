@@ -74,24 +74,21 @@ PerfectNumbersDistributed/
 │               └── master.properties
 ├── worker/
 │   ├── build.gradle
-│   ├── src/
-│   │   └── main/
-│   │       ├── java/
-│   │       │   └── com/
-│   │       │       └── example/
-│   │       │           └── worker/
-│   │       │               ├── WorkerApp.java
-│   │       │               └── WorkerServiceI.java
-│   │       └── resources/
-│   │           └── worker.properties
-│   └── tiempos_ejecucion.txt
+│   ├── tiempos_ejecucion.txt
+│   └── src/
+│       └── main/
+│           ├── java/
+│           │   └── com/
+│           │       └── example/
+│           │           └── worker/
+│           │               ├── WorkerApp.java
+│           │               └── WorkerServiceI.java
+│           └── resources/
+│               └── worker.properties
 ├── doc/
 |   └── Informe_PerfectNumbersDistributed.pdf
 └── PerfectNumbersApp/
-    ├── build.gradle
-    ├── src/                ← (esta es generada automática de stubs ICE)
-    └── App.ice
-
+    └── build.gradle
 ```
 
 ## Requisitos
