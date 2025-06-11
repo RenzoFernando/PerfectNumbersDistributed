@@ -13,52 +13,92 @@
 <p align="justify">La comunicación entre estos componentes se maneja de forma asíncrona a través de Ice, lo que garantiza un flujo de trabajo no bloqueante y una mayor eficiencia en la interacción del sistema. El proyecto está construido con Gradle y utiliza JavaFX para la interfaz gráfica del cliente, asegurando un entorno de desarrollo y ejecución robusto y modular.</p>
 
 ## Integrantes
-- Daniel Esteban Arcos Cerón &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00400760]
+- Daniel Esteban Arcos Cerón &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00400760] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/Darcos23
 
-- Luna Catalina Martínez Vásquez &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00401964]
+- Luna Catalina Martínez Vásquez &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00401964] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/LunaKtalina
 
-- Renzo Fernando Mosquera Daza &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00401681]
+- Renzo Fernando Mosquera Daza &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00401681] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/RenzoFernando
 
-- Hideki Tamura Hernández &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00348618]
+- Hideki Tamura Hernández &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[A00348618] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/Hisansei
+
+## Índice
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Requisitos](#requisitos)
+- [Instrucciones de ejecución](#instrucciones-de-ejecución)
 
 ## Estructura del proyecto
 ```plaintext
 PerfectNumbersDistributed/
-├── build.gradle
-├── settings.gradle
 ├── App.ice
+├── build.gradle
+├── gradlew
+├── gradlew.bat
+├── settings.gradle
+├── gradle/
+│   ├── libs.versions.toml
+│   └── wrapper/
+│       └── gradle-wrapper.properties
 ├── client/
 │   ├── build.gradle
-│   ├── src/main/java/com/example/client/
-│   │   ├── ClientApp.java
-│   │   ├── ClientAppLauncher.java
-│   │   ├── ClientNotifierI.java
-│   │   └── ClientViewController.java
-│   └── src/main/resources/
-│   │   └── client.properties
-│   └── src/main/resources/com/example/client/
-│       └── client-view.fxml
+│   ├── tiempos_ejecucion.txt
+│   └── src/
+│       └── main/
+│           ├── java/
+│           │   └── com/
+│           │       └── example/
+│           │           └── client/
+│           │               ├── ClientApp.java
+│           │               ├── ClientAppLauncher.java
+│           │               ├── ClientNotifierI.java
+│           │               └── ClientViewController.java
+│           └── resources/
+│               ├── client.properties
+│               └── com/
+│                   └── example/
+│                       └── client/
+│                           ├── client-view.fxml
+│                           └── perfectnumbers-styles.css
 ├── master/
 │   ├── build.gradle
-│   ├── src/main/java/com/example/master/
-│   │   ├── MasterApp.java
-│   │   ├── MasterControllerI.java
-│   │   └── MasterServiceI.java
-│   └── src/main/resources/
-│       └── master.properties
+│   ├── tiempos_ejecucion.txt
+│   └── src/
+│       └── main/
+│           ├── java/
+│           │   └── com/
+│           │       └── example/
+│           │           └── master/
+│           │               ├── MasterApp.java
+│           │               ├── MasterControllerI.java
+│           │               └── MasterServiceI.java
+│           └── resources/
+│               └── master.properties
 ├── worker/
 │   ├── build.gradle
-│   ├── src/main/java/com/example/worker/
-│   │   ├── WorkerApp.java
-│   │   ├── WorkerServiceI.java
-│   │   └── WorkerUtils.java
-│   └── src/main/resources/
-│       └── worker.properties
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/
+│   │       │   └── com/
+│   │       │       └── example/
+│   │       │           └── worker/
+│   │       │               ├── WorkerApp.java
+│   │       │               └── WorkerServiceI.java
+│   │       └── resources/
+│   │           └── worker.properties
+│   └── tiempos_ejecucion.txt
+├── doc/
+|   └── Informe_PerfectNumbersDistributed.pdf
 └── PerfectNumbersApp/
     ├── build.gradle
-    ├── bin/
-    └── build/
+    ├── src/                ← (esta es generada automática de stubs ICE)
+    └── App.ice
+
 ```
+
+## Requisitos
+- Java 11 o superior
+- Gradle 7.5+
+- ZeroC Ice 3.7.x
+
 
 ## Instrucciones de ejecución
 
